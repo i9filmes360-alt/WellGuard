@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WellGuard PRO P... - v10.2 All-Control</title>
+    <title>WellGuard PRO X - v10.4 Inverse Colors</title>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
@@ -14,21 +15,14 @@
             --vis-bg: #080808;
             --cyan: #00f5ff;
             --purple: #8b00ff;
-            --red: #ff2d55;
+            --red: #ff2d55; /* Agora usada nos dígitos */
             --green: #00ff9d;
             --btn-gray: #1f1f22;
-
-            --branco:  #ffffff;
-            --laranja: #ff9100;
-            --azul:    #0011ff;
-            --vermelho:#ff0000;
-            --preto:   #000000
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body {
-/*======================= FUNDO DA PAGINA ======================================*/
             font-family: 'Inter', system-ui, sans-serif;
             background: var(--bg);
             color: #ddd;
@@ -37,7 +31,7 @@
             display: flex;
             justify-content: center;
         }
-/*======================= FUNDO DOS CARTÔES ======================================*/
+
         .container {
             width: 100%;
             max-width: 1000px;
@@ -57,7 +51,6 @@
             align-items: center;
             border-bottom: 1px solid #222;
         }
-/*======================= TITULO ======================================*/
 
         .header h1 {
             font-size: 0.85rem;
@@ -106,9 +99,9 @@
             text-transform: uppercase;
             font-weight: 600;
         }
-/*======================= COR INTERNA DO VIZOR ======================================*/
+
         .visor-interno {
-            background: var(--preto);
+            background: var(--vis-bg);
             border-radius: 8px;
             padding: 5px 10px;
             margin-bottom: 5px;
@@ -116,16 +109,15 @@
             box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5);
         }
 
-             /* COR DOS DÍGITOS */
-
+        /* DÍGITOS AGORA SÃO VERMELHOS */
         .display {
             font-size: 1.6rem;
             font-weight: 700;
             font-family: 'Courier New', monospace;
-            color: var( --vermelho);  /* <--- ESTA LINHA CONTROLA A COR */
+            color: var(--red);
             text-align: right;
+            text-shadow: 0 0 5px rgba(255, 45, 85, 0.3);
         }
-            /* Fim da Rotina */
 
         .bar-wrap {
             height: 4px;
@@ -135,7 +127,7 @@
             margin-top: 3px;
         }
 
-        .bar-fill { height: 100%; background: linear-gradient(90deg, #00acc1, var(--green)); width: 0%; transition: 0.6s; }
+        .bar-fill { height: 100%; background: var(--red); width: 0%; transition: 0.6s; }
 
         .card-controls {
             display: flex;
@@ -167,8 +159,10 @@
         }
 
         .btn-secondary { background: var(--btn-gray); color: #bbb; border: 1px solid #2a2a2a; }
+        
+        /* BOTÕES ON/OFF AGORA SÃO CIANO QUANDO ATIVOS */
         .btn-toggle { padding: 4px 8px; font-size: 0.55rem; background: #1f1f22; color: #fff; border: 1px solid #333; min-width: 40px; }
-        .btn-active { background: var(--azul); border-color: #700; }
+        .btn-active { background: var(--cyan); color: #000; border-color: var(--cyan); box-shadow: 0 0 10px rgba(0, 245, 255, 0.4); }
 
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; align-items: center; justify-content: center; }
         .modal-content {
@@ -189,7 +183,7 @@
 
 <div class="container">
     <div class="header">
-        <h1>WELLGUARD PRO P...</h1>
+        <h1>WELLGUARD PRO X</h1>
         <div class="status-area">
             <button onclick="toggleFullScreen()" class="btn-secondary" style="padding: 5px 10px; font-size: 0.8rem;">⛶</button>
             <div class="led-group">
@@ -201,7 +195,6 @@
     </div>
 
     <div class="instrument-grid">
-        <!-- GÁS -->
         <div class="instrument">
             <div class="label">GÁS (PPM)</div>
             <div class="visor-interno"><div class="display" id="gasV">0000</div><div class="bar-wrap"><div id="gasB" class="bar-fill"></div></div></div>
@@ -211,7 +204,6 @@
             </div>
         </div>
 
-        <!-- TEMP -->
         <div class="instrument">
             <div class="label">TEMP (°C)</div>
             <div class="visor-interno"><div class="display" id="tempV">0.0</div><div class="bar-wrap"><div id="tempB" class="bar-fill"></div></div></div>
@@ -221,7 +213,6 @@
             </div>
         </div>
 
-        <!-- VAZÃO -->
         <div class="instrument">
             <div class="label">VAZÃO (L/M)</div>
             <div class="visor-interno"><div class="display" id="flowV">0.0</div><div class="bar-wrap"><div id="flowB" class="bar-fill"></div></div></div>
@@ -231,7 +222,6 @@
             </div>
         </div>
 
-        <!-- PRESSÃO -->
         <div class="instrument">
             <div class="label">PRESS (BAR)</div>
             <div class="visor-interno"><div class="display" id="pressV">0.00</div><div class="bar-wrap"><div id="pressB" class="bar-fill"></div></div></div>
@@ -241,7 +231,6 @@
             </div>
         </div>
 
-        <!-- NÍVEL -->
         <div class="instrument">
             <div class="label">NÍVEL (%)</div>
             <div class="visor-interno"><div class="display" id="nivelV">0.0</div><div class="bar-wrap"><div id="nivelB" class="bar-fill"></div></div></div>
@@ -251,7 +240,6 @@
             </div>
         </div>
 
-        <!-- PRESENÇA -->
         <div class="instrument">
             <div class="label">PRESENÇA</div>
             <div class="visor-interno">
@@ -287,53 +275,30 @@
 <script>
     const client = mqtt.connect("wss://broker.emqx.io:8084/mqtt");
     let espTimeout = null, audioCtx = null, sirenInterval = null, isMuted = false;
-    
-    // Objeto para controlar o estado de cada sensor
-    const sensorStatus = {
-        gas: true, temp: true, flow: true, press: true, nivel: true, pres: true
-    };
+    const sensorStatus = { gas: true, temp: true, flow: true, press: true, nivel: true, pres: true };
 
     function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-    
     function toggleFullScreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(e => alert(`Erro: ${e.message}`));
-        } else {
-            if (document.exitFullscreen) document.exitFullscreen();
-        }
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(e => alert(e.message));
+        else if (document.exitFullscreen) document.exitFullscreen();
     }
 
     function toggleMute() {
         isMuted = !isMuted;
-        const btn = document.getElementById('muteBtn');
-        btn.style.background = isMuted ? '#ff2d55' : '#1f1f22';
+        document.getElementById('muteBtn').style.background = isMuted ? '#ff2d55' : '#1f1f22';
         if (isMuted && sirenInterval) { clearInterval(sirenInterval); sirenInterval = null; }
     }
 
-    // Função universal de Toggle para sensores
     function toggleSensor(type) {
         sensorStatus[type] = !sensorStatus[type];
         const btn = document.getElementById(type + 'Tgl');
-        
-        if(sensorStatus[type]) {
-            btn.innerText = "ON";
-            btn.classList.add('btn-active');
-        } else {
-            btn.innerText = "OFF";
-            btn.classList.remove('btn-active');
-            // Remove o alarme visual imediatamente ao desligar
-            document.getElementById(type + 'A').classList.remove('alarm-on');
-        }
-        
-        // Envia comando MQTT para o ESP (opcional, para controle de hardware)
+        if(sensorStatus[type]) { btn.innerText = "ON"; btn.classList.add('btn-active'); }
+        else { btn.innerText = "OFF"; btn.classList.remove('btn-active'); document.getElementById(type + 'A').classList.remove('alarm-on'); }
         client.publish(`casa/set/${type}_on`, sensorStatus[type] ? "1" : "0");
     }
 
     function playSiren(on) {
-        if (!on || isMuted) {
-            if(sirenInterval) { clearInterval(sirenInterval); sirenInterval = null; }
-            return;
-        }
+        if (!on || isMuted) { if(sirenInterval) { clearInterval(sirenInterval); sirenInterval = null; } return; }
         initAudio();
         if (!sirenInterval && audioCtx) {
             sirenInterval = setInterval(() => {
@@ -349,12 +314,10 @@
     }
 
     client.on("connect", () => document.getElementById('webLed').classList.add('online'));
-
     client.on("message", (t, m) => {
         document.getElementById('espLed').classList.add('online');
         clearTimeout(espTimeout);
         espTimeout = setTimeout(() => document.getElementById('espLed').classList.remove('online'), 2000);
-
         const val = m.toString();
         const num = parseFloat(val);
 
@@ -364,41 +327,33 @@
             document.getElementById('gasV').innerText = real.toString().padStart(4, '0');
             document.getElementById('gasB').style.width = Math.min((real/sp)*100, 100) + "%";
             document.getElementById('gasA').classList.toggle('alarm-on', real >= sp && sensorStatus.gas);
-            
         } else if(t.includes("temp")) {
             const sp = parseFloat(document.getElementById('s2').value) || 50;
             document.getElementById('tempV').innerText = num.toFixed(1);
             document.getElementById('tempB').style.width = Math.min((num/sp)*100, 100) + "%";
             document.getElementById('tempA').classList.toggle('alarm-on', num >= sp && sensorStatus.temp);
-            
         } else if(t.includes("fluxo")) {
             const sp = parseFloat(document.getElementById('s3').value) || 10;
             document.getElementById('flowV').innerText = num.toFixed(1);
             document.getElementById('flowB').style.width = Math.min((num/sp)*100, 100) + "%";
             document.getElementById('flowA').classList.toggle('alarm-on', num >= sp && sensorStatus.flow);
-            
         } else if(t.includes("pressao")) {
             const sp = parseFloat(document.getElementById('s4').value) || 4;
             document.getElementById('pressV').innerText = num.toFixed(2);
             document.getElementById('pressB').style.width = Math.min((num/sp)*100, 100) + "%";
             document.getElementById('pressA').classList.toggle('alarm-on', num >= sp && sensorStatus.press);
-            
         } else if(t.includes("nivel")) {
             const sp = parseFloat(document.getElementById('s5').value) || 80;
             document.getElementById('nivelV').innerText = num.toFixed(1);
             document.getElementById('nivelB').style.width = Math.min(num, 100) + "%";
             document.getElementById('nivelA').classList.toggle('alarm-on', num >= sp && sensorStatus.nivel);
-            
         } else if(t.includes("presenca")) {
             const det = (val === "DETECTADO");
-            document.getElementById('presV').innerText = det ? "ALERTA" : "OK";
+            document.getElementById('presV').innerText = det ? "ALERT" : "OK";
             document.getElementById('presV').style.color = det ? "#ff2d55" : "#00f5ff";
             document.getElementById('presA').classList.toggle('alarm-on', det && sensorStatus.pres);
         }
-
-        // Verifica se há qualquer alarme ATIVO E LIGADO no momento
-        const anyAlarm = document.querySelectorAll('.alarm-on').length > 0;
-        playSiren(anyAlarm);
+        playSiren(document.querySelectorAll('.alarm-on').length > 0);
     });
 
     client.subscribe(["casa/gas/vazamento", "casa/temp/ambiente", "casa/fluxo/agua", "casa/pressao/agua", "casa/nivel/caixa", "casa/presenca/status"]);
@@ -422,7 +377,7 @@
     function generatePDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        doc.text("RELATORIO WELLGUARD PRO P", 20, 20);
+        doc.text("RELATORIO WELLGUARD PRO X", 20, 20);
         doc.save("Relatorio.pdf");
     }
 </script>
