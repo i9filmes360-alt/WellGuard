@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WellGuard PRO X - v10.4 Inverse Colors</title>
+    <title>WellGuard PRO X - v10.4 Corrigido</title>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
@@ -15,7 +14,7 @@
             --vis-bg: #080808;
             --cyan: #00f5ff;
             --purple: #8b00ff;
-            --red: #ff2d55; /* Agora usada nos dígitos */
+            --red: #ff2d55;
             --green: #00ff9d;
             --btn-gray: #1f1f22;
         }
@@ -109,7 +108,6 @@
             box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5);
         }
 
-        /* DÍGITOS AGORA SÃO VERMELHOS */
         .display {
             font-size: 1.6rem;
             font-weight: 700;
@@ -160,7 +158,6 @@
 
         .btn-secondary { background: var(--btn-gray); color: #bbb; border: 1px solid #2a2a2a; }
         
-        /* BOTÕES ON/OFF AGORA SÃO CIANO QUANDO ATIVOS */
         .btn-toggle { padding: 4px 8px; font-size: 0.55rem; background: #1f1f22; color: #fff; border: 1px solid #333; min-width: 40px; }
         .btn-active { background: var(--cyan); color: #000; border-color: var(--cyan); box-shadow: 0 0 10px rgba(0, 245, 255, 0.4); }
 
@@ -278,27 +275,56 @@
     const sensorStatus = { gas: true, temp: true, flow: true, press: true, nivel: true, pres: true };
 
     function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    
     function toggleFullScreen() {
         if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(e => alert(e.message));
         else if (document.exitFullscreen) document.exitFullscreen();
     }
 
+    // --- CORREÇÃO DA FUNÇÃO MUTE PARA ALARME FÍSICO ---
     function toggleMute() {
         isMuted = !isMuted;
-        document.getElementById('muteBtn').style.background = isMuted ? '#ff2d55' : '#1f1f22';
-        if (isMuted && sirenInterval) { clearInterval(sirenInterval); sirenInterval = null; }
+        const muteBtn = document.getElementById('muteBtn');
+        
+        // Interface visual
+        muteBtn.style.background = isMuted ? 'var(--red)' : '#1f1f22';
+        muteBtn.innerText = isMuted ? 'UNMUTE' : 'MUTE';
+
+        // Silenciar áudio local do navegador
+        if (isMuted && sirenInterval) { 
+            clearInterval(sirenInterval); 
+            sirenInterval = null; 
+        }
+
+        // COMANDO MQTT PARA O HARDWARE (ESP32)
+        // Publica 1 para silenciar sirene física e 0 para liberar
+        client.publish("casa/set/mute", isMuted ? "1" : "0");
     }
 
     function toggleSensor(type) {
         sensorStatus[type] = !sensorStatus[type];
         const btn = document.getElementById(type + 'Tgl');
-        if(sensorStatus[type]) { btn.innerText = "ON"; btn.classList.add('btn-active'); }
-        else { btn.innerText = "OFF"; btn.classList.remove('btn-active'); document.getElementById(type + 'A').classList.remove('alarm-on'); }
+        if(sensorStatus[type]) { 
+            btn.innerText = "ON"; 
+            btn.classList.add('btn-active'); 
+        } else { 
+            btn.innerText = "OFF"; 
+            btn.classList.remove('btn-active'); 
+            document.getElementById(type + 'A').classList.remove('alarm-on'); 
+        }
         client.publish(`casa/set/${type}_on`, sensorStatus[type] ? "1" : "0");
+        
+        // Se desligou o sensor, verifica se ainda há algum alarme ativo para parar a sirene
+        checkSirenStatus();
     }
 
     function playSiren(on) {
-        if (!on || isMuted) { if(sirenInterval) { clearInterval(sirenInterval); sirenInterval = null; } return; }
+        // Se o mute estiver ativo ou não houver alarme, para o som local
+        if (!on || isMuted) { 
+            if(sirenInterval) { clearInterval(sirenInterval); sirenInterval = null; } 
+            return; 
+        }
+        
         initAudio();
         if (!sirenInterval && audioCtx) {
             sirenInterval = setInterval(() => {
@@ -313,11 +339,23 @@
         }
     }
 
-    client.on("connect", () => document.getElementById('webLed').classList.add('online'));
+    // Função auxiliar para centralizar o controle da sirene
+    function checkSirenStatus() {
+        const alarmsActive = document.querySelectorAll('.alarm-on').length > 0;
+        playSiren(alarmsActive);
+    }
+
+    client.on("connect", () => {
+        document.getElementById('webLed').classList.add('online');
+        // Ao conectar, garante que o ESP saiba o estado inicial do Mute
+        client.publish("casa/set/mute", isMuted ? "1" : "0");
+    });
+
     client.on("message", (t, m) => {
         document.getElementById('espLed').classList.add('online');
         clearTimeout(espTimeout);
         espTimeout = setTimeout(() => document.getElementById('espLed').classList.remove('online'), 2000);
+        
         const val = m.toString();
         const num = parseFloat(val);
 
@@ -353,7 +391,8 @@
             document.getElementById('presV').style.color = det ? "#ff2d55" : "#00f5ff";
             document.getElementById('presA').classList.toggle('alarm-on', det && sensorStatus.pres);
         }
-        playSiren(document.querySelectorAll('.alarm-on').length > 0);
+        
+        checkSirenStatus();
     });
 
     client.subscribe(["casa/gas/vazamento", "casa/temp/ambiente", "casa/fluxo/agua", "casa/pressao/agua", "casa/nivel/caixa", "casa/presenca/status"]);
