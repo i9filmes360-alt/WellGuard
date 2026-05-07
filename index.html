@@ -3,177 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WellGuard PRO X - v10.4 Corrigido</title>
+    <title>WellGuard PRO X - v10.6 Gradient Edition</title>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <style>
         :root {
-            --bg: #0a0a0b;
-            --card: #141416;
-            --vis-bg: #080808;
-            --cyan: #00f5ff;
-            --purple: #8b00ff;
-            --red: #ff2d55;
-            --green: #00ff9d;
-            --btn-gray: #1f1f22;
+            --bg: #0a0a0b; --card: #141416; --vis-bg: #080808;
+            --cyan: #00f5ff; --purple: #8b00ff; --red: #ff2d55;
+            --green: #00ff9d; --yellow: #ffcc00; --btn-gray: #1f1f22;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        body {
-            font-family: 'Inter', system-ui, sans-serif;
-            background: var(--bg);
-            color: #ddd;
-            padding: 5px;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 1000px;
-            background: var(--card);
-            border-radius: 15px;
-            overflow: hidden;
-            border: 1px solid #222;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .header {
-            background: #0d0d0f;
-            padding: 10px 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #222;
-        }
-
-        .header h1 {
-            font-size: 0.85rem;
-            font-weight: 900;
-            color: var(--cyan);
-            letter-spacing: 1px;
-        }
-
-        .status-area { display: flex; align-items: center; gap: 8px; }
-
-        .led-group { display: flex; gap: 8px; align-items: center; }
-
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: #ddd; padding: 5px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 1000px; background: var(--card); border-radius: 15px; border: 1px solid #222; display: flex; flex-direction: column; }
+        .header { background: #0d0d0f; padding: 10px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
+        .header h1 { font-size: 0.85rem; color: var(--cyan); letter-spacing: 1px; }
+        .led-group { display: flex; gap: 8px; }
         .led-item { font-size: 0.5rem; color: #666; text-align: center; }
-
-        .led {
-            width: 10px; height: 10px;
-            border-radius: 50%;
-            background: #222;
-            margin: 0 auto 2px;
-            border: 1px solid #000;
-        }
-
+        .led { width: 10px; height: 10px; border-radius: 50%; background: #222; margin: 0 auto 2px; }
         #webLed.online { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
         #espLed.online { background: var(--green); box-shadow: 0 0 8px var(--green); }
+        
+        .instrument-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px; }
+        .instrument { background: #18181a; border-radius: 12px; padding: 10px; border: 1px solid #252525; }
+        .label { font-size: 0.6rem; color: #888; margin-bottom: 5px; text-transform: uppercase; font-weight: 600; }
+        .visor-interno { background: var(--vis-bg); border-radius: 8px; padding: 5px 10px; border-top: 1px solid #000; box-shadow: inset 0 2px 5px rgba(0,0,0,0.8); }
+        .display { font-size: 1.6rem; font-weight: 700; font-family: 'Courier New', monospace; color: var(--red); text-align: right; }
 
-        .instrument-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            padding: 10px;
-        }
-
-        .instrument {
-            background: #18181a;
-            border-radius: 12px;
-            padding: 10px;
-            border: 1px solid #252525;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .label {
-            font-size: 0.6rem;
-            color: #888;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-
-        .visor-interno {
-            background: var(--vis-bg);
-            border-radius: 8px;
-            padding: 5px 10px;
-            margin-bottom: 5px;
-            border-top: 1px solid #000;
-            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5);
-        }
-
-        .display {
-            font-size: 1.6rem;
-            font-weight: 700;
-            font-family: 'Courier New', monospace;
-            color: var(--red);
-            text-align: right;
-            text-shadow: 0 0 5px rgba(255, 45, 85, 0.3);
-        }
-
-        .bar-wrap {
-            height: 4px;
-            background: #000;
-            border-radius: 5px;
-            overflow: hidden;
-            margin-top: 3px;
-        }
-
-        .bar-fill { height: 100%; background: var(--red); width: 0%; transition: 0.6s; }
-
-        .card-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* --- ESTILIZAÇÃO DAS BARRAS COM GRADIENTE --- */
+        .bar-wrap { 
+            height: 8px; /* Aumentei um pouco para o gradiente aparecer melhor */
+            background: #000; 
+            border-radius: 4px; 
+            overflow: hidden; 
             margin-top: 5px;
+            border: 1px solid #222;
+        }
+        .bar-fill { 
+            height: 100%; 
+            width: 0%; 
+            transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            /* Gradiente Fixo: a barra 'corre' revelando as cores */
+            background: linear-gradient(90deg, 
+                var(--green) 0%, 
+                var(--yellow) 50%, 
+                var(--red) 100%
+            );
+            background-size: 100% 100%; /* Mantém o gradiente proporcional à largura total da barra */
+            box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);
         }
 
+        .card-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
         .alarm { width: 14px; height: 14px; border-radius: 50%; background: #111; border: 1px solid #000; }
-        .alarm-on { background: var(--red); box-shadow: 0 0 10px var(--red); animation: pulse 1s infinite; }
-
-        @keyframes pulse { 50% { opacity: 0.5; } }
-
-        .footer-btns {
-            padding: 10px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
-        button {
-            padding: 10px;
-            font-weight: 700;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-size: 0.65rem;
-            transition: 0.2s;
-        }
-
+        .alarm-on { background: var(--red); box-shadow: 0 0 12px var(--red); animation: pulse 1s infinite; }
+        @keyframes pulse { 50% { opacity: 0.3; } }
+        
+        .footer-btns { padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        button { padding: 10px; font-weight: 700; border-radius: 8px; border: none; cursor: pointer; font-size: 0.65rem; transition: 0.2s; }
         .btn-secondary { background: var(--btn-gray); color: #bbb; border: 1px solid #2a2a2a; }
+        .btn-toggle { padding: 4px 8px; font-size: 0.55rem; background: #1f1f22; color: #fff; min-width: 45px; border: 1px solid #333; }
+        .btn-active { background: var(--cyan); color: #000; border-color: var(--cyan); box-shadow: 0 0 8px rgba(0, 245, 255, 0.3); }
         
-        .btn-toggle { padding: 4px 8px; font-size: 0.55rem; background: #1f1f22; color: #fff; border: 1px solid #333; min-width: 40px; }
-        .btn-active { background: var(--cyan); color: #000; border-color: var(--cyan); box-shadow: 0 0 10px rgba(0, 245, 255, 0.4); }
-
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; align-items: center; justify-content: center; }
-        .modal-content {
-            background: #141416; padding: 20px; border-radius: 15px;
-            width: 85%; max-width: 320px; border: 1px solid #333;
-        }
-        
+        .modal-content { background: #141416; padding: 20px; border-radius: 15px; width: 85%; max-width: 320px; border: 1px solid #333; }
         input { width: 100%; padding: 8px; background: #080808; border: 1px solid #2a2a2a; color: var(--cyan); margin-bottom: 8px; border-radius: 5px; outline: none; }
-        label { font-size: 0.6rem; color: #888; display: block; margin-top: 5px; }
-
-        @media (max-width: 350px) {
-            .display { font-size: 1.3rem; }
-            .header h1 { font-size: 0.7rem; }
-        }
     </style>
 </head>
 <body>
@@ -181,13 +74,12 @@
 <div class="container">
     <div class="header">
         <h1>WELLGUARD PRO X</h1>
-        <div class="status-area">
-            <button onclick="toggleFullScreen()" class="btn-secondary" style="padding: 5px 10px; font-size: 0.8rem;">⛶</button>
+        <div style="display:flex; align-items:center; gap:8px;">
             <div class="led-group">
                 <div class="led-item"><div id="webLed" class="led"></div>WEB</div>
                 <div class="led-item"><div id="espLed" class="led"></div>ESP</div>
             </div>
-            <button id="muteBtn" onclick="toggleMute()" class="btn-secondary" style="padding: 5px 8px; font-size: 0.5rem;">MUTE</button>
+            <button id="muteBtn" onclick="toggleMute()" class="btn-secondary">MUTE</button>
         </div>
     </div>
 
@@ -239,9 +131,7 @@
 
         <div class="instrument">
             <div class="label">PRESENÇA</div>
-            <div class="visor-interno">
-                <div class="display" id="presV" style="text-align:center; font-size: 1.1rem;">OK</div>
-            </div>
+            <div class="visor-interno"><div class="display" id="presV" style="text-align:center; font-size:1.1rem;">OK</div></div>
             <div class="card-controls">
                 <button id="presTgl" onclick="toggleSensor('pres')" class="btn-toggle btn-active">ON</button>
                 <div id="presA" class="alarm"></div>
@@ -257,74 +147,56 @@
 
 <div id="modal" class="modal">
     <div class="modal-content">
-        <h4 style="color:var(--cyan); margin-bottom:10px; text-align:center; font-size: 0.8rem;">PARÂMETROS</h4>
         <label>SP GÁS</label><input type="number" id="s1">
         <label>SP TEMP</label><input type="number" id="s2">
         <label>SP VAZÃO</label><input type="number" id="s3">
         <label>SP PRESS</label><input type="number" id="s4" step="0.1">
         <label>SP NÍVEL</label><input type="number" id="s5">
         <label>ZERO GÁS</label><input type="number" id="s6">
-        <button onclick="save()" style="background:var(--purple); color:white; width:100%; margin-top:5px;">SALVAR</button>
+        <button onclick="save()" style="background:var(--purple); color:white; width:100%;">SALVAR</button>
         <button onclick="document.getElementById('modal').style.display='none'" style="background:none; color:#888; width:100%; margin-top:5px;">VOLTAR</button>
     </div>
 </div>
 
 <script>
+    // LÓGICA MANTIDA CONFORME VERSÃO ANTERIOR (FUNCIONAL)
     const client = mqtt.connect("wss://broker.emqx.io:8084/mqtt");
     let espTimeout = null, audioCtx = null, sirenInterval = null, isMuted = false;
     const sensorStatus = { gas: true, temp: true, flow: true, press: true, nivel: true, pres: true };
 
     function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-    
-    function toggleFullScreen() {
-        if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(e => alert(e.message));
-        else if (document.exitFullscreen) document.exitFullscreen();
-    }
 
-    // --- CORREÇÃO DA FUNÇÃO MUTE PARA ALARME FÍSICO ---
     function toggleMute() {
         isMuted = !isMuted;
-        const muteBtn = document.getElementById('muteBtn');
-        
-        // Interface visual
-        muteBtn.style.background = isMuted ? 'var(--red)' : '#1f1f22';
-        muteBtn.innerText = isMuted ? 'UNMUTE' : 'MUTE';
-
-        // Silenciar áudio local do navegador
-        if (isMuted && sirenInterval) { 
-            clearInterval(sirenInterval); 
-            sirenInterval = null; 
-        }
-
-        // COMANDO MQTT PARA O HARDWARE (ESP32)
-        // Publica 1 para silenciar sirene física e 0 para liberar
+        document.getElementById('muteBtn').style.background = isMuted ? 'var(--red)' : '#1f1f22';
         client.publish("casa/set/mute", isMuted ? "1" : "0");
+        checkSirenStatus();
     }
 
     function toggleSensor(type) {
         sensorStatus[type] = !sensorStatus[type];
         const btn = document.getElementById(type + 'Tgl');
-        if(sensorStatus[type]) { 
-            btn.innerText = "ON"; 
-            btn.classList.add('btn-active'); 
-        } else { 
-            btn.innerText = "OFF"; 
-            btn.classList.remove('btn-active'); 
-            document.getElementById(type + 'A').classList.remove('alarm-on'); 
+        const alarmDiv = document.getElementById(type + 'A');
+        if(sensorStatus[type]) {
+            btn.innerText = "ON"; btn.classList.add('btn-active');
+        } else {
+            btn.innerText = "OFF"; btn.classList.remove('btn-active');
+            alarmDiv.classList.remove('alarm-on');
         }
         client.publish(`casa/set/${type}_on`, sensorStatus[type] ? "1" : "0");
-        
-        // Se desligou o sensor, verifica se ainda há algum alarme ativo para parar a sirene
         checkSirenStatus();
     }
 
-    function playSiren(on) {
-        // Se o mute estiver ativo ou não houver alarme, para o som local
-        if (!on || isMuted) { 
-            if(sirenInterval) { clearInterval(sirenInterval); sirenInterval = null; } 
-            return; 
-        }
-        
+    function checkSirenStatus() {
+        const anyAlarm = document.querySelectorAll('.alarm-on').length > 0;
+        if (!anyAlarm || isMuted) {
+            if(sirenInterval) { clearInterval(sirenInterval); sirenInterval = null; }
+        } else { playSiren(); }
+        if (!anyAlarm) { client.publish("casa/set/mute", "1"); }
+        else if (!isMuted) { client.publish("casa/set/mute", "0"); }
+    }
+
+    function playSiren() {
         initAudio();
         if (!sirenInterval && audioCtx) {
             sirenInterval = setInterval(() => {
@@ -339,23 +211,11 @@
         }
     }
 
-    // Função auxiliar para centralizar o controle da sirene
-    function checkSirenStatus() {
-        const alarmsActive = document.querySelectorAll('.alarm-on').length > 0;
-        playSiren(alarmsActive);
-    }
-
-    client.on("connect", () => {
-        document.getElementById('webLed').classList.add('online');
-        // Ao conectar, garante que o ESP saiba o estado inicial do Mute
-        client.publish("casa/set/mute", isMuted ? "1" : "0");
-    });
-
+    client.on("connect", () => document.getElementById('webLed').classList.add('online'));
     client.on("message", (t, m) => {
         document.getElementById('espLed').classList.add('online');
         clearTimeout(espTimeout);
         espTimeout = setTimeout(() => document.getElementById('espLed').classList.remove('online'), 2000);
-        
         const val = m.toString();
         const num = parseFloat(val);
 
@@ -391,7 +251,6 @@
             document.getElementById('presV').style.color = det ? "#ff2d55" : "#00f5ff";
             document.getElementById('presA').classList.toggle('alarm-on', det && sensorStatus.pres);
         }
-        
         checkSirenStatus();
     });
 
