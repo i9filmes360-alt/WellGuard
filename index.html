@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WellGuard PRO X - v10.6 Gradient Edition</title>
+    <title>WellGuard PRO X - v10.7 FullScreen</title>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
@@ -14,43 +14,34 @@
             --green: #00ff9d; --yellow: #ffcc00; --btn-gray: #1f1f22;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: #ddd; padding: 5px; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 1000px; background: var(--card); border-radius: 15px; border: 1px solid #222; display: flex; flex-direction: column; }
-        .header { background: #0d0d0f; padding: 10px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: #ddd; padding: 5px; display: flex; justify-content: center; min-height: 100vh; }
+        
+        /* Container ajustado para Fullscreen */
+        .container { width: 100%; max-width: 1000px; background: var(--card); border-radius: 15px; border: 1px solid #222; display: flex; flex-direction: column; overflow: hidden; }
+        
+        .header { background: #0d0d0f; padding: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
         .header h1 { font-size: 0.85rem; color: var(--cyan); letter-spacing: 1px; }
+        
+        .header-actions { display: flex; align-items: center; gap: 10px; }
+
         .led-group { display: flex; gap: 8px; }
         .led-item { font-size: 0.5rem; color: #666; text-align: center; }
         .led { width: 10px; height: 10px; border-radius: 50%; background: #222; margin: 0 auto 2px; }
         #webLed.online { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
         #espLed.online { background: var(--green); box-shadow: 0 0 8px var(--green); }
         
-        .instrument-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px; }
-        .instrument { background: #18181a; border-radius: 12px; padding: 10px; border: 1px solid #252525; }
+        .instrument-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px; flex-grow: 1; }
+        .instrument { background: #18181a; border-radius: 12px; padding: 10px; border: 1px solid #252525; display: flex; flex-direction: column; justify-content: space-between; }
+        
         .label { font-size: 0.6rem; color: #888; margin-bottom: 5px; text-transform: uppercase; font-weight: 600; }
         .visor-interno { background: var(--vis-bg); border-radius: 8px; padding: 5px 10px; border-top: 1px solid #000; box-shadow: inset 0 2px 5px rgba(0,0,0,0.8); }
         .display { font-size: 1.6rem; font-weight: 700; font-family: 'Courier New', monospace; color: var(--red); text-align: right; }
 
-        /* --- ESTILIZAÇÃO DAS BARRAS COM GRADIENTE --- */
-        .bar-wrap { 
-            height: 8px; /* Aumentei um pouco para o gradiente aparecer melhor */
-            background: #000; 
-            border-radius: 4px; 
-            overflow: hidden; 
-            margin-top: 5px;
-            border: 1px solid #222;
-        }
+        .bar-wrap { height: 8px; background: #000; border-radius: 4px; overflow: hidden; margin-top: 5px; border: 1px solid #222; }
         .bar-fill { 
-            height: 100%; 
-            width: 0%; 
-            transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            /* Gradiente Fixo: a barra 'corre' revelando as cores */
-            background: linear-gradient(90deg, 
-                var(--green) 0%, 
-                var(--yellow) 50%, 
-                var(--red) 100%
-            );
-            background-size: 100% 100%; /* Mantém o gradiente proporcional à largura total da barra */
-            box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);
+            height: 100%; width: 0%; transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(90deg, var(--green) 0%, var(--yellow) 50%, var(--red) 100%);
+            background-size: 100% 100%;
         }
 
         .card-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
@@ -62,28 +53,33 @@
         button { padding: 10px; font-weight: 700; border-radius: 8px; border: none; cursor: pointer; font-size: 0.65rem; transition: 0.2s; }
         .btn-secondary { background: var(--btn-gray); color: #bbb; border: 1px solid #2a2a2a; }
         .btn-toggle { padding: 4px 8px; font-size: 0.55rem; background: #1f1f22; color: #fff; min-width: 45px; border: 1px solid #333; }
-        .btn-active { background: var(--cyan); color: #000; border-color: var(--cyan); box-shadow: 0 0 8px rgba(0, 245, 255, 0.3); }
+        .btn-active { background: var(--cyan); color: #000; border-color: var(--cyan); }
         
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; align-items: center; justify-content: center; }
         .modal-content { background: #141416; padding: 20px; border-radius: 15px; width: 85%; max-width: 320px; border: 1px solid #333; }
         input { width: 100%; padding: 8px; background: #080808; border: 1px solid #2a2a2a; color: var(--cyan); margin-bottom: 8px; border-radius: 5px; outline: none; }
+        
+        /* Estilo para o botão de tela cheia */
+        #fsBtn { font-size: 0.8rem; padding: 8px 12px; }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="container" id="mainApp">
     <div class="header">
         <h1>WELLGUARD PRO X</h1>
-        <div style="display:flex; align-items:center; gap:8px;">
+        <div class="header-actions">
             <div class="led-group">
                 <div class="led-item"><div id="webLed" class="led"></div>WEB</div>
                 <div class="led-item"><div id="espLed" class="led"></div>ESP</div>
             </div>
-            <button id="muteBtn" onclick="toggleMute()" class="btn-secondary">MUTE</button>
+            <button id="muteBtn" onclick="toggleMute()" class="btn-secondary" style="padding: 8px 12px;">MUTE</button>
+            <button id="fsBtn" onclick="toggleFullScreen()" class="btn-secondary">⛶</button>
         </div>
     </div>
 
     <div class="instrument-grid">
+        <!-- GÁS -->
         <div class="instrument">
             <div class="label">GÁS (PPM)</div>
             <div class="visor-interno"><div class="display" id="gasV">0000</div><div class="bar-wrap"><div id="gasB" class="bar-fill"></div></div></div>
@@ -92,7 +88,7 @@
                 <div id="gasA" class="alarm"></div>
             </div>
         </div>
-
+        <!-- TEMP -->
         <div class="instrument">
             <div class="label">TEMP (°C)</div>
             <div class="visor-interno"><div class="display" id="tempV">0.0</div><div class="bar-wrap"><div id="tempB" class="bar-fill"></div></div></div>
@@ -101,7 +97,7 @@
                 <div id="tempA" class="alarm"></div>
             </div>
         </div>
-
+        <!-- VAZÃO -->
         <div class="instrument">
             <div class="label">VAZÃO (L/M)</div>
             <div class="visor-interno"><div class="display" id="flowV">0.0</div><div class="bar-wrap"><div id="flowB" class="bar-fill"></div></div></div>
@@ -110,7 +106,7 @@
                 <div id="flowA" class="alarm"></div>
             </div>
         </div>
-
+        <!-- PRESSÃO -->
         <div class="instrument">
             <div class="label">PRESS (BAR)</div>
             <div class="visor-interno"><div class="display" id="pressV">0.00</div><div class="bar-wrap"><div id="pressB" class="bar-fill"></div></div></div>
@@ -119,7 +115,7 @@
                 <div id="pressA" class="alarm"></div>
             </div>
         </div>
-
+        <!-- NÍVEL -->
         <div class="instrument">
             <div class="label">NÍVEL (%)</div>
             <div class="visor-interno"><div class="display" id="nivelV">0.0</div><div class="bar-wrap"><div id="nivelB" class="bar-fill"></div></div></div>
@@ -128,10 +124,10 @@
                 <div id="nivelA" class="alarm"></div>
             </div>
         </div>
-
+        <!-- PRESENÇA -->
         <div class="instrument">
             <div class="label">PRESENÇA</div>
-            <div class="visor-interno"><div class="display" id="presV" style="text-align:center; font-size:1.1rem;">OK</div></div>
+            <div class="visor-interno"><div class="display" id="presV" style="text-align:center; font-size:1.1rem; padding: 5px 0;">OK</div></div>
             <div class="card-controls">
                 <button id="presTgl" onclick="toggleSensor('pres')" class="btn-toggle btn-active">ON</button>
                 <div id="presA" class="alarm"></div>
@@ -140,8 +136,8 @@
     </div>
 
     <div class="footer-btns">
-        <button class="btn-secondary" onclick="generatePDF()">📄 PDF</button>
-        <button class="btn-secondary" onclick="document.getElementById('modal').style.display='flex'">⚙️ CONFIG</button>
+        <button class="btn-secondary" onclick="generatePDF()">📄 RELATÓRIO PDF</button>
+        <button class="btn-secondary" onclick="document.getElementById('modal').style.display='flex'">⚙️ CONFIGURAÇÕES</button>
     </div>
 </div>
 
@@ -154,15 +150,27 @@
         <label>SP NÍVEL</label><input type="number" id="s5">
         <label>ZERO GÁS</label><input type="number" id="s6">
         <button onclick="save()" style="background:var(--purple); color:white; width:100%;">SALVAR</button>
-        <button onclick="document.getElementById('modal').style.display='none'" style="background:none; color:#888; width:100%; margin-top:5px;">VOLTAR</button>
+        <button onclick="document.getElementById('modal').style.display='none'" style="background:none; color:#888; width:100%; margin-top:10px;">FECHAR</button>
     </div>
 </div>
 
 <script>
-    // LÓGICA MANTIDA CONFORME VERSÃO ANTERIOR (FUNCIONAL)
     const client = mqtt.connect("wss://broker.emqx.io:8084/mqtt");
     let espTimeout = null, audioCtx = null, sirenInterval = null, isMuted = false;
     const sensorStatus = { gas: true, temp: true, flow: true, press: true, nivel: true, pres: true };
+
+    // FUNÇÃO FULLSCREEN
+    function toggleFullScreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                alert(`Erro ao tentar ativar tela cheia: ${err.message}`);
+            });
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+    }
 
     function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
 
@@ -192,6 +200,7 @@
         if (!anyAlarm || isMuted) {
             if(sirenInterval) { clearInterval(sirenInterval); sirenInterval = null; }
         } else { playSiren(); }
+        
         if (!anyAlarm) { client.publish("casa/set/mute", "1"); }
         else if (!isMuted) { client.publish("casa/set/mute", "0"); }
     }
@@ -216,6 +225,7 @@
         document.getElementById('espLed').classList.add('online');
         clearTimeout(espTimeout);
         espTimeout = setTimeout(() => document.getElementById('espLed').classList.remove('online'), 2000);
+        
         const val = m.toString();
         const num = parseFloat(val);
 
@@ -275,8 +285,14 @@
     function generatePDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        doc.text("RELATORIO WELLGUARD PRO X", 20, 20);
-        doc.save("Relatorio.pdf");
+        doc.setFontSize(20);
+        doc.text("RELATÓRIO WELLGUARD PRO X", 20, 20);
+        doc.setFontSize(12);
+        doc.text(`Data: ${new Date().toLocaleString()}`, 20, 30);
+        doc.text(`Sensor de Gás: ${document.getElementById('gasV').innerText} PPM`, 20, 40);
+        doc.text(`Temperatura: ${document.getElementById('tempV').innerText} °C`, 20, 50);
+        doc.text(`Nível: ${document.getElementById('nivelV').innerText} %`, 20, 60);
+        doc.save("Relatorio_WellGuard.pdf");
     }
 </script>
 </body>
