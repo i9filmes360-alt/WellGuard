@@ -2,77 +2,82 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WellGuard P PRO X - v11.1</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>WellGuard P PRO X - v11.7</title>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
         :root {
-            --bg: #0a0a0b;
-            --card: #141416;
-            --vis-bg: #050505;
-            --cyan: #00f5ff; /* Dígitos */
-            --purple: #8b00ff;
-            --red: #ff2d55;  /* Alarme e Botões ON */
-            --green: #00ff9d;
-            --btn-gray: #1f1f22;
+            --bg: #0a0a0b; --card: #141416; --vis-bg: #050505;
+            --cyan: #00f5ff; --purple: #8b00ff; --red: #ff2d55;
+            --green: #00ff9d; --btn-gray: #1f1f22;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: #ddd; padding: 5px; display: flex; justify-content: center; min-height: 100vh; }
-        .container { width: 100%; max-width: 1000px; background: var(--card); border-radius: 15px; overflow: hidden; border: 1px solid #222; display: flex; flex-direction: column; }
-        
-        .header { background: #0d0d0f; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
-        .header h1 { font-size: 0.85rem; font-weight: 900; color: var(--cyan); letter-spacing: 1px; }
-        
-        .status-area { display: flex; align-items: center; gap: 10px; }
-        .led-group { display: flex; gap: 8px; align-items: center; }
-        .led-item { font-size: 0.5rem; color: #666; text-align: center; }
-        .led { width: 10px; height: 10px; border-radius: 50%; background: #222; margin: 0 auto 2px; border: 1px solid #000; }
+        * { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
+        body { 
+            font-family: 'Inter', sans-serif; background: var(--bg); color: #ddd; 
+            height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; 
+        }
+        .container { 
+            width: 98vw; height: 98vh; max-width: 1000px; background: var(--card); 
+            border-radius: 12px; overflow: hidden; border: 1px solid #222; display: flex; flex-direction: column; 
+        }
+        .header { 
+            background: #0d0d0f; padding: 8px 12px; display: flex; justify-content: space-between; 
+            align-items: center; border-bottom: 1px solid #222; flex-shrink: 0;
+        }
+        .header h1 { font-size: 0.75rem; font-weight: 900; color: var(--cyan); letter-spacing: 1px; }
+        .status-area { display: flex; align-items: center; gap: 8px; }
+        .led-group { display: flex; gap: 6px; }
+        .led-item { font-size: 0.45rem; color: #666; text-align: center; }
+        .led { width: 8px; height: 8px; border-radius: 50%; background: #222; margin: 0 auto 2px; }
         #webLed.online { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
         #espLed.online { background: var(--green); box-shadow: 0 0 8px var(--green); }
 
-        .instrument-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px; }
-        .instrument { background: #18181a; border-radius: 12px; padding: 10px; border: 1px solid #252525; }
-        .label { font-size: 0.6rem; color: #888; margin-bottom: 5px; text-transform: uppercase; font-weight: 600; }
-        .visor-interno { background: var(--vis-bg); border-radius: 8px; padding: 5px 10px; margin-bottom: 5px; border-top: 1px solid #000; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5); }
-        
-        .display { font-size: 1.6rem; font-weight: 700; font-family: 'Courier New', monospace; color: var(--cyan); text-align: right; text-shadow: 0 0 10px rgba(0, 245, 255, 0.3); }
-
-        .bar-wrap { height: 6px; background: #000; border-radius: 5px; overflow: hidden; margin-top: 5px; }
-        .bar-fill { height: 100%; background: linear-gradient(90deg, var(--green) 0%, #ffcc00 50%, var(--red) 100%); width: 0%; transition: 0.4s ease; }
-
-        .card-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; }
-        .btn-toggle { padding: 4px 8px; font-size: 0.55rem; background: #1f1f22; color: #777; border: 1px solid #333; min-width: 45px; border-radius: 4px; font-weight: bold; cursor: pointer; }
-        .btn-active { background: var(--red); color: #fff; border-color: var(--red); box-shadow: 0 0 8px rgba(255, 45, 85, 0.4); }
-
-        .alarm { width: 14px; height: 14px; border-radius: 50%; background: #111; border: 1px solid #000; }
+        .instrument-grid { 
+            display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr);
+            gap: 6px; padding: 8px; flex-grow: 1; 
+        }
+        .instrument { 
+            background: #18181a; border-radius: 10px; padding: 8px; border: 1px solid #252525; 
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .label { font-size: 0.55rem; color: #888; text-transform: uppercase; font-weight: 600; }
+        .visor-interno { 
+            background: var(--vis-bg); border-radius: 6px; padding: 4px 8px; border-top: 1px solid #000; 
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5); flex-grow: 1; display: flex; flex-direction: column; justify-content: center;
+        }
+        .display { font-size: 1.4rem; font-weight: 700; font-family: 'Courier New', monospace; color: var(--red); text-align: right; }
+        .bar-wrap { height: 4px; background: #000; border-radius: 3px; overflow: hidden; margin-top: 4px; }
+        .bar-fill { height: 100%; background: var(--red); width: 0%; transition: 0.4s; }
+        .card-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
+        .btn-toggle { padding: 3px 6px; font-size: 0.5rem; background: #1f1f22; color: #fff; border: 1px solid #333; border-radius: 4px; font-weight: bold; }
+        .btn-active { background: var(--cyan); color: #000; border-color: var(--cyan); }
+        .alarm { width: 12px; height: 12px; border-radius: 50%; background: #111; }
         .alarm-on { background: var(--red); box-shadow: 0 0 10px var(--red); animation: pulse 0.5s infinite; }
         @keyframes pulse { 50% { opacity: 0.3; } }
+        .footer-btns { padding: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; flex-shrink: 0; }
+        .btn-sec { padding: 8px; background: var(--btn-gray); color: #bbb; border: 1px solid #2a2a2a; border-radius: 6px; font-weight: 700; font-size: 0.6rem; }
 
-        .footer-btns { padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .btn-sec { padding: 10px; background: var(--btn-gray); color: #bbb; border: 1px solid #2a2a2a; border-radius: 8px; font-weight: 700; font-size: 0.65rem; cursor: pointer; }
-
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; align-items: center; justify-content: center; }
-        .modal-content { background: #141416; padding: 20px; border-radius: 15px; width: 85%; max-width: 320px; border: 1px solid #333; }
-        input { width: 100%; padding: 8px; background: #080808; border: 1px solid #2a2a2a; color: var(--cyan); margin-bottom: 8px; border-radius: 5px; outline: none; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-content { background: #141416; padding: 15px; border-radius: 12px; width: 90%; max-width: 300px; border: 1px solid #333; }
+        input { width: 100%; padding: 6px; background: #080808; border: 1px solid #2a2a2a; color: var(--cyan); margin-bottom: 6px; border-radius: 4px; outline: none; }
     </style>
 </head>
 <body onclick="initAudio()">
 
 <div class="container">
     <div class="header">
-        <h1>WELLGUARD P PRO X v11.1</h1>
+        <h1>WELLGUARD P PRO X v11.7</h1>
         <div class="status-area">
-            <button onclick="toggleFullScreen()" style="background:var(--btn-gray); color:white; border:1px solid #333; padding: 5px 10px; border-radius:4px;">⛶</button>
+            <button onclick="toggleFullScreen()" class="btn-sec" style="padding: 4px 8px;">⛶</button>
             <div class="led-group">
                 <div class="led-item"><div id="webLed" class="led"></div>WEB</div>
                 <div class="led-item"><div id="espLed" class="led"></div>ESP</div>
             </div>
-            <button id="muteBtn" onclick="toggleMute()" style="background:var(--btn-gray); color:#eee; border:1px solid #333; padding:5px 8px; border-radius:4px;">MUTE</button>
+            <button id="muteBtn" onclick="toggleMute()" class="btn-sec" style="padding:4px 8px; font-size:0.5rem;">MUTE</button>
         </div>
     </div>
 
     <div class="instrument-grid">
-        <!-- Repetição dos instrumentos conforme o padrão solicitado -->
         <div class="instrument">
             <div class="label">GÁS (PPM)</div>
             <div class="visor-interno"><div class="display" id="gasV">0000</div><div class="bar-wrap"><div id="gasB" class="bar-fill"></div></div></div>
@@ -100,7 +105,7 @@
         </div>
         <div class="instrument">
             <div class="label">PRESENÇA</div>
-            <div class="visor-interno"><div class="display" id="presV" style="text-align:center; font-size:1.1rem;">OK</div><div class="bar-wrap"><div id="presB" class="bar-fill"></div></div></div>
+            <div class="visor-interno"><div class="display" id="presV" style="text-align:center; font-size:1rem;">OK</div></div>
             <div class="card-controls"><button id="presTgl" onclick="toggleSensor('pres')" class="btn-toggle btn-active">ON</button><div id="presA" class="alarm"></div></div>
         </div>
     </div>
@@ -113,13 +118,13 @@
 
 <div id="modal" class="modal">
     <div class="modal-content">
-        <h4>PARÂMETROS</h4>
-        <label>SP GÁS</label><input type="number" id="s1" value="2000">
-        <label>SP TEMP</label><input type="number" id="s2" value="50">
-        <label>SP VAZÃO</label><input type="number" id="s3" value="10">
-        <label>SP PRESS</label><input type="number" id="s4" value="4">
-        <label>SP NÍVEL</label><input type="number" id="s5" value="80">
-        <label>ZERO GÁS</label><input type="number" id="s6" value="0">
+        <h4 style="font-size: 0.8rem; margin-bottom: 10px; color:var(--cyan);">PARÂMETROS</h4>
+        <label style="font-size: 10px;">SP GÁS</label><input type="number" id="s1" value="2000">
+        <label style="font-size: 10px;">SP TEMP</label><input type="number" id="s2" value="50">
+        <label style="font-size: 10px;">SP VAZÃO</label><input type="number" id="s3" value="10">
+        <label style="font-size: 10px;">SP PRESS</label><input type="number" id="s4" value="4">
+        <label style="font-size: 10px;">SP NÍVEL</label><input type="number" id="s5" value="80">
+        <label style="font-size: 10px;">ZERO GÁS</label><input type="number" id="s6" value="0">
         <button onclick="save()" style="background:var(--purple); color:white; width:100%; padding:10px; border:none; border-radius:5px; margin-top:10px; font-weight:bold;">SALVAR</button>
         <button onclick="document.getElementById('modal').style.display='none'" style="background:none; color:#888; width:100%; margin-top:10px; border:none;">FECHAR</button>
     </div>
@@ -128,63 +133,54 @@
 <script>
     const client = mqtt.connect("wss://broker.emqx.io:8084/mqtt");
     let espTimeout = null, audioCtx = null, sirenInterval = null, isMuted = false;
-    let activeAlarms = new Set();
     const sensorStatus = { gas: true, temp: true, flow: true, press: true, nivel: true, pres: true };
 
-    // --- LÓGICA DA SIRENE FRANCESA TURBO ---
     function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
 
+    function checkAlarms() {
+        const hasActiveAlarm = document.querySelectorAll('.alarm-on').length > 0;
+        
+        // 1. Controle da Sirene Local (Browser)
+        if (hasActiveAlarm && !isMuted) {
+            startSiren();
+        } else {
+            stopSiren();
+        }
+
+        // 2. Controle da Sirene Física (ESP32 via MQTT)
+        // Envia "0" para ligar a sirene física, "1" para desligar
+        if (hasActiveAlarm && !isMuted) {
+            client.publish("casa/set/mute", "0");
+        } else {
+            client.publish("casa/set/mute", "1");
+        }
+    }
+
     function startSiren() {
-        if (sirenInterval || isMuted) return;
+        if (sirenInterval) return;
         initAudio();
         let step = 0;
-        const freqs = [440, 587]; // Frequências da sirene francesa
+        const freqs = [440, 587]; 
         sirenInterval = setInterval(() => {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'sawtooth';
             osc.frequency.setValueAtTime(freqs[step], audioCtx.currentTime);
             gain.gain.setValueAtTime(0, audioCtx.currentTime);
-            gain.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.05);
+            gain.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime + 0.05);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.4);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.4);
             step = (step + 1) % 2;
         }, 400); 
     }
 
-    function stopSiren() { 
-        if(sirenInterval) {
-            clearInterval(sirenInterval); 
-            sirenInterval = null; 
-        }
-    }
-
-    // Gerenciador central de alarmes
-    function updateAlarm(id, isActive) {
-        if (isActive) activeAlarms.add(id); else activeAlarms.delete(id);
-        
-        // Atualiza visual
-        const alarmLed = document.getElementById(id + 'A');
-        if(alarmLed) alarmLed.classList.toggle('alarm-on', isActive);
-        
-        // Controle da Sirene e MQTT para o Relé do ESP32
-        if (activeAlarms.size > 0 && !isMuted) {
-            startSiren();
-            client.publish("casa/set/mute", "0"); // Avisa o ESP para ligar o relé
-        } else {
-            stopSiren();
-            client.publish("casa/set/mute", "1"); // Avisa o ESP para desligar o relé
-        }
-    }
+    function stopSiren() { if(sirenInterval) { clearInterval(sirenInterval); sirenInterval = null; } }
 
     function toggleMute() {
         isMuted = !isMuted;
         document.getElementById('muteBtn').style.background = isMuted ? 'var(--red)' : '#1f1f22';
-        client.publish("casa/set/mute", isMuted ? "1" : "0");
-        if (isMuted) stopSiren(); else if (activeAlarms.size > 0) startSiren();
+        checkAlarms();
     }
 
     function toggleSensor(type) {
@@ -192,70 +188,62 @@
         const btn = document.getElementById(type + 'Tgl');
         btn.innerText = sensorStatus[type] ? "ON" : "OFF";
         btn.classList.toggle('btn-active');
-        client.publish(`casa/set/${type}_on`, sensorStatus[type] ? "1" : "0");
-        if(!sensorStatus[type]) updateAlarm(type, false);
+        if(!sensorStatus[type]) document.getElementById(type + 'A').classList.remove('alarm-on');
+        checkAlarms();
     }
 
     function toggleFullScreen() {
         if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-        else document.exitFullscreen();
+        else if (document.exitFullscreen) document.exitFullscreen();
     }
 
     client.on("connect", () => document.getElementById('webLed').classList.add('online'));
-
     client.on("message", (t, m) => {
         document.getElementById('espLed').classList.add('online');
         clearTimeout(espTimeout);
         espTimeout = setTimeout(() => document.getElementById('espLed').classList.remove('online'), 2000);
-        
         const val = m.toString();
         const num = parseFloat(val);
 
         if(t.includes("gas")) {
-            const sp = parseInt(document.getElementById('s1').value);
+            const sp = parseInt(document.getElementById('s1').value) || 2000;
             const r = Math.max(0, num - parseInt(document.getElementById('s6').value));
-            document.getElementById('gasV').innerText = r;
+            document.getElementById('gasV').innerText = r.toString().padStart(4, '0');
             document.getElementById('gasB').style.width = Math.min((r/sp)*100, 100) + "%";
-            updateAlarm('gas', r >= sp && sensorStatus.gas);
+            document.getElementById('gasA').classList.toggle('alarm-on', r >= sp && sensorStatus.gas);
         } else if(t.includes("temp")) {
-            const sp = parseFloat(document.getElementById('s2').value);
+            const sp = parseFloat(document.getElementById('s2').value) || 50;
             document.getElementById('tempV').innerText = num.toFixed(1);
             document.getElementById('tempB').style.width = Math.min((num/sp)*100, 100) + "%";
-            updateAlarm('temp', num >= sp && sensorStatus.temp);
+            document.getElementById('tempA').classList.toggle('alarm-on', num >= sp && sensorStatus.temp);
         } else if(t.includes("fluxo")) {
-            const sp = parseFloat(document.getElementById('s3').value);
+            const sp = parseFloat(document.getElementById('s3').value) || 10;
             document.getElementById('flowV').innerText = num.toFixed(1);
             document.getElementById('flowB').style.width = Math.min((num/sp)*100, 100) + "%";
-            updateAlarm('flow', num >= sp && sensorStatus.flow);
+            document.getElementById('flowA').classList.toggle('alarm-on', num >= sp && sensorStatus.flow);
         } else if(t.includes("pressao")) {
-            const sp = parseFloat(document.getElementById('s4').value);
+            const sp = parseFloat(document.getElementById('s4').value) || 4;
             document.getElementById('pressV').innerText = num.toFixed(2);
             document.getElementById('pressB').style.width = Math.min((num/sp)*100, 100) + "%";
-            updateAlarm('press', num >= sp && sensorStatus.press);
+            document.getElementById('pressA').classList.toggle('alarm-on', num >= sp && sensorStatus.press);
         } else if(t.includes("nivel")) {
-            const sp = parseFloat(document.getElementById('s5').value);
+            const sp = parseFloat(document.getElementById('s5').value) || 80;
             document.getElementById('nivelV').innerText = num.toFixed(1);
             document.getElementById('nivelB').style.width = Math.min(num, 100) + "%";
-            updateAlarm('nivel', num >= sp && sensorStatus.nivel);
+            document.getElementById('nivelA').classList.toggle('alarm-on', num >= sp && sensorStatus.nivel);
         } else if(t.includes("presenca")) {
             const d = (val === "DETECTADO");
             document.getElementById('presV').innerText = d ? "ALERT" : "OK";
             document.getElementById('presV').style.color = d ? "var(--red)" : "var(--cyan)";
-            document.getElementById('presB').style.width = d ? "100%" : "0%";
-            updateAlarm('pres', d && sensorStatus.pres);
+            document.getElementById('presA').classList.toggle('alarm-on', d && sensorStatus.pres);
         }
+        checkAlarms();
     });
 
     client.subscribe(["casa/gas/vazamento", "casa/temp/ambiente", "casa/fluxo/agua", "casa/pressao/agua", "casa/nivel/caixa", "casa/presenca/status"]);
 
     function save() {
-        ['s1','s2','s3','s4','s5','s6'].forEach(id => {
-            const val = document.getElementById(id).value;
-            localStorage.setItem('wg_'+id, val);
-            // Envia para o ESP32 também
-            const topics = {s1:'gas', s2:'temp', s3:'fluxo', s4:'pressao', s5:'nivel', s6:'base'};
-            client.publish('casa/set/' + topics[id], val);
-        });
+        ['s1','s2','s3','s4','s5','s6'].forEach(id => localStorage.setItem('wg_'+id, document.getElementById(id).value));
         document.getElementById('modal').style.display='none';
     }
 
