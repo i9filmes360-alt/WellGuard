@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WellGuard PRO X - v10.6 Gradient Edition</title>
+    <title>WellGuard PRO X - v10.6.2</title>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
@@ -16,40 +16,34 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: #ddd; padding: 5px; display: flex; justify-content: center; }
         .container { width: 100%; max-width: 1000px; background: var(--card); border-radius: 15px; border: 1px solid #222; display: flex; flex-direction: column; }
-        .header { background: #0d0d0f; padding: 10px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
+
+        .header { 
+            background: #0d0d0f; 
+            padding: 10px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 1px solid #222; 
+        }
         .header h1 { font-size: 0.85rem; color: var(--cyan); letter-spacing: 1px; }
         .led-group { display: flex; gap: 8px; }
         .led-item { font-size: 0.5rem; color: #666; text-align: center; }
         .led { width: 10px; height: 10px; border-radius: 50%; background: #222; margin: 0 auto 2px; }
         #webLed.online { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
         #espLed.online { background: var(--green); box-shadow: 0 0 8px var(--green); }
-        
+
+        .header-buttons { display: flex; gap: 8px; align-items: center; }
+
         .instrument-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px; }
         .instrument { background: #18181a; border-radius: 12px; padding: 10px; border: 1px solid #252525; }
         .label { font-size: 0.6rem; color: #888; margin-bottom: 5px; text-transform: uppercase; font-weight: 600; }
         .visor-interno { background: var(--vis-bg); border-radius: 8px; padding: 5px 10px; border-top: 1px solid #000; box-shadow: inset 0 2px 5px rgba(0,0,0,0.8); }
         .display { font-size: 1.6rem; font-weight: 700; font-family: 'Courier New', monospace; color: var(--red); text-align: right; }
 
-        /* --- ESTILIZAÇÃO DAS BARRAS COM GRADIENTE --- */
-        .bar-wrap { 
-            height: 8px; /* Aumentei um pouco para o gradiente aparecer melhor */
-            background: #000; 
-            border-radius: 4px; 
-            overflow: hidden; 
-            margin-top: 5px;
-            border: 1px solid #222;
-        }
-        .bar-fill { 
-            height: 100%; 
-            width: 0%; 
-            transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            /* Gradiente Fixo: a barra 'corre' revelando as cores */
-            background: linear-gradient(90deg, 
-                var(--green) 0%, 
-                var(--yellow) 50%, 
-                var(--red) 100%
-            );
-            background-size: 100% 100%; /* Mantém o gradiente proporcional à largura total da barra */
+        .bar-wrap { height: 8px; background: #000; border-radius: 4px; overflow: hidden; margin-top: 5px; border: 1px solid #222; }
+        .bar-fill { height: 100%; width: 0%; transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(90deg, var(--green) 0%, var(--yellow) 50%, var(--red) 100%);
+            background-size: 100% 100%;
             box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);
         }
 
@@ -74,15 +68,18 @@
 <div class="container">
     <div class="header">
         <h1>WELLGUARD PRO X</h1>
-        <div style="display:flex; align-items:center; gap:8px;">
+        
+        <div class="header-buttons">
             <div class="led-group">
                 <div class="led-item"><div id="webLed" class="led"></div>WEB</div>
                 <div class="led-item"><div id="espLed" class="led"></div>ESP</div>
             </div>
+            <button id="fullBtn" onclick="toggleFullscreen()" class="btn-secondary" title="Tela Cheia">⛶</button>
             <button id="muteBtn" onclick="toggleMute()" class="btn-secondary">MUTE</button>
         </div>
     </div>
 
+    <!-- Resto da página permanece igual -->
     <div class="instrument-grid">
         <div class="instrument">
             <div class="label">GÁS (PPM)</div>
@@ -159,12 +156,33 @@
 </div>
 
 <script>
-    // LÓGICA MANTIDA CONFORME VERSÃO ANTERIOR (FUNCIONAL)
     const client = mqtt.connect("wss://broker.emqx.io:8084/mqtt");
     let espTimeout = null, audioCtx = null, sirenInterval = null, isMuted = false;
     const sensorStatus = { gas: true, temp: true, flow: true, press: true, nivel: true, pres: true };
 
-    function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    function initAudio() { 
+        if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
+    }
+
+    // ==================== FULLSCREEN ====================
+    function toggleFullscreen() {
+        const btn = document.getElementById('fullBtn');
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().then(() => {
+                btn.innerHTML = '⤢'; // ícone de sair
+            }).catch(err => console.log(err));
+        } else {
+            document.exitFullscreen().then(() => {
+                btn.innerHTML = '⛶';
+            });
+        }
+    }
+
+    // Atualiza ícone ao entrar/sair do fullscreen manualmente
+    document.addEventListener('fullscreenchange', () => {
+        const btn = document.getElementById('fullBtn');
+        btn.innerHTML = document.fullscreenElement ? '⤢' : '⛶';
+    });
 
     function toggleMute() {
         isMuted = !isMuted;
@@ -211,11 +229,13 @@
         }
     }
 
+    // MQTT
     client.on("connect", () => document.getElementById('webLed').classList.add('online'));
     client.on("message", (t, m) => {
         document.getElementById('espLed').classList.add('online');
         clearTimeout(espTimeout);
         espTimeout = setTimeout(() => document.getElementById('espLed').classList.remove('online'), 2000);
+        
         const val = m.toString();
         const num = parseFloat(val);
 
