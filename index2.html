@@ -726,7 +726,6 @@
 
     <script>
         // ==================== CONFIGURAÇÕES FIXAS DA API ====================
-        // ✅ TOKEN CONFIGURADO COM SUCESSO!
         const API_CONFIG = {
             url: "https://api.apibrasil.com.br/v1/sms/send",
             token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2FwcC5hcGlicmFzaWwuaW8vYXBpL3YyL2F1dGgvbG9naW4iLCJpYXQiOjE3ODY0NzUyNDUsImV4cCI6MTgxODAxMTI0NSwibmJmIjoxNzg2NDc1MjQ1LCJqdGkiOiJkNDhGQlJ4YUl0a3habElhIiwic3ViIjoiNTc4NDMifQ.gSTGlKQWMx_HagwpQ10fYdYpZEDrHRo8stuIPGLYZwY"
@@ -754,6 +753,41 @@
         };
         let lastEspPing = 0;
         const ESP_TIMEOUT = 5000;
+        let configLoaded = false;
+
+        // ==================== CARREGAR CONFIGURAÇÕES DO ESP ====================
+        function loadConfigFromESP() {
+            // Solicita as configurações atuais do ESP
+            client.publish("casa/get/config", "1");
+            client.publish("casa/get/phones", "1");
+        }
+
+        // ==================== RECEBER CONFIGURAÇÕES DO ESP ====================
+        function applyConfigFromESP(topic, value) {
+            if (topic === "casa/config/s1") {
+                document.getElementById('s1').value = value;
+            } else if (topic === "casa/config/s2") {
+                document.getElementById('s2').value = value;
+            } else if (topic === "casa/config/s3") {
+                document.getElementById('s3').value = value;
+            } else if (topic === "casa/config/s4") {
+                document.getElementById('s4').value = value;
+            } else if (topic === "casa/config/s5") {
+                document.getElementById('s5').value = value;
+            } else if (topic === "casa/config/s6") {
+                document.getElementById('s6').value = value;
+            } else if (topic === "casa/config/phones") {
+                try {
+                    const data = JSON.parse(value);
+                    if (Array.isArray(data)) {
+                        phones = data;
+                        renderPhones();
+                    }
+                } catch(e) {
+                    console.log("Erro ao processar lista de telefones:", e);
+                }
+            }
+        }
 
         function updateEspStatus() {
             const statusLabel = document.getElementById('espStatusLabel');
@@ -960,26 +994,6 @@
             }
         }
 
-        function loadPhones() {
-            try {
-                const saved = localStorage.getItem('wellguard_phones');
-                if (saved) {
-                    phones = JSON.parse(saved);
-                    if (!Array.isArray(phones)) phones = [];
-                } else {
-                    phones = [];
-                }
-            } catch (e) {
-                phones = [];
-            }
-            renderPhones();
-        }
-
-        function savePhones() {
-            localStorage.setItem('wellguard_phones', JSON.stringify(phones));
-            renderPhones();
-        }
-
         function renderPhones() {
             const list = document.getElementById('phoneList');
             const count = document.getElementById('phoneCount');
@@ -1039,16 +1053,19 @@
             }
 
             phones.push(fullPhone);
-            savePhones();
+            renderPhones();
             input.value = '';
             input.focus();
+            // Salva no ESP
+            client.publish('casa/set/phones', JSON.stringify(phones));
         }
 
         function removePhone(index) {
             if (isLockdownActive) return;
             if (confirm(`Deseja remover o telefone ${phones[index]}?`)) {
                 phones.splice(index, 1);
-                savePhones();
+                renderPhones();
+                client.publish('casa/set/phones', JSON.stringify(phones));
             }
         }
 
@@ -1060,7 +1077,8 @@
             }
             if (confirm('⚠️ Tem certeza que deseja remover TODOS os telefones cadastrados?')) {
                 phones = [];
-                savePhones();
+                renderPhones();
+                client.publish('casa/set/phones', JSON.stringify(phones));
             }
         }
 
@@ -1071,20 +1089,13 @@
                     addPhone();
                 }
             });
-            
-            setTimeout(() => {
-                if (client.connected) {
-                    client.publish('casa/set/sms_url', API_CONFIG.url);
-                    client.publish('casa/set/sms_token', API_CONFIG.token);
-                    console.log('📡 Configuração da API enviada para o ESP');
-                }
-            }, 2000);
         });
 
         client.on("connect", () => {
             document.getElementById('webLed').classList.add('online');
             client.subscribe("casa/set/#");
             client.subscribe("casa/status/#");
+            client.subscribe("casa/config/#");
             client.subscribe("casa/gas/#");
             client.subscribe("casa/temp/#");
             client.subscribe("casa/fluxo/#");
@@ -1093,14 +1104,25 @@
             client.subscribe("casa/presenca/#");
             client.publish("casa/get/lockdown", "1");
             
+            // Envia configuração da API
             client.publish('casa/set/sms_url', API_CONFIG.url);
             client.publish('casa/set/sms_token', API_CONFIG.token);
-            console.log('📡 API configurada e enviada para o ESP');
+            
+            // Solicita configurações atuais
+            setTimeout(() => {
+                loadConfigFromESP();
+            }, 1000);
         });
 
         client.on("message", (t, m) => {
             const topic = t.toString();
             const val = m.toString();
+
+            // ==================== CONFIGURAÇÕES DO ESP ====================
+            if (topic.startsWith("casa/config/")) {
+                applyConfigFromESP(topic, val);
+                return;
+            }
 
             if (topic.startsWith("casa/") && !topic.includes("set/")) {
                 isEspOnline = true;
@@ -1191,33 +1213,61 @@
                 return;
             }
 
-            const config = { s1: 'gas', s2: 'temp', s3: 'fluxo', s4: 'pressao', s5: 'nivel', s6: 'base' };
-            for (let id in config) {
-                const val = document.getElementById(id).value;
-                localStorage.setItem('wellguard_v10_' + id, val);
-                client.publish('casa/set/' + config[id], val);
+            const configs = {
+                s1: document.getElementById('s1').value,
+                s2: document.getElementById('s2').value,
+                s3: document.getElementById('s3').value,
+                s4: document.getElementById('s4').value,
+                s5: document.getElementById('s5').value,
+                s6: document.getElementById('s6').value
+            };
+
+            // Salva cada configuração no ESP
+            for (let id in configs) {
+                client.publish('casa/set/' + id, configs[id]);
             }
 
+            // Salva a lista de telefones
             client.publish('casa/set/phones', JSON.stringify(phones));
 
             document.getElementById('modal').style.display = 'none';
-            alert('✅ Configurações salvas com sucesso!');
+            alert('✅ Configurações salvas no ESP com sucesso!\nTodos os dispositivos verão as alterações.');
         }
 
         window.onload = () => {
             const keys = ['s1', 's2', 's3', 's4', 's5', 's6'];
             const defaults = [2000, 50, 10, 4, 80, 0];
-            keys.forEach((k, i) => document.getElementById(k).value = localStorage.getItem('wellguard_v10_' + k) ||
-                defaults[i]);
+            keys.forEach((k, i) => {
+                const saved = localStorage.getItem('wellguard_v10_' + k);
+                if (saved) {
+                    document.getElementById(k).value = saved;
+                } else {
+                    document.getElementById(k).value = defaults[i];
+                }
+            });
 
             loadPhones();
             applyLockdownState();
             updateEspStatus();
             
             console.log('🔐 API configurada com credenciais fixas');
-            console.log('📡 URL:', API_CONFIG.url);
-            console.log('🔑 Token configurado com sucesso!');
+            console.log('📡 Aguardando configurações do ESP...');
         };
+
+        function loadPhones() {
+            try {
+                const saved = localStorage.getItem('wellguard_phones');
+                if (saved) {
+                    phones = JSON.parse(saved);
+                    if (!Array.isArray(phones)) phones = [];
+                } else {
+                    phones = [];
+                }
+            } catch (e) {
+                phones = [];
+            }
+            renderPhones();
+        }
 
         function generatePDF() {
             if (isLockdownActive) {
