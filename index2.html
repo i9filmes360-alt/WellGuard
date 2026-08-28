@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -8,41 +9,121 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         /* ================================================================
-           CORES LABVIEW - Azul claro, Branco, Vermelho
+           CORES LABVIEW - TEMA CLARO (PADRÃO)
            ================================================================ */
         :root {
-            --bg: #0b1219;                    /* Fundo escuro (mantido) */
-            --card: #eaf1f9;                  /* Fundo do cartão - branco/azul claro */
-            --card-bg-start: #f0f6fc;         /* Início gradiente do card */
-            --card-bg-end: #d8e6f2;           /* Fim gradiente do card */
-            --vis-bg: #dce8f2;                /* Fundo do visor */
-            --cyan: #1a8bc0;                  /* Azul principal LabVIEW */
-            --cyan-light: #4fc3f7;            /* Azul claro para destaques */
-            --cyan-bright: #80d8ff;           /* Azul mais claro */
-            --purple: #8b00ff;
-            --red: #e06060;                   /* Vermelho LabVIEW */
-            --red-dark: #b83030;              /* Vermelho escuro */
-            --red-bright: #ff8a8a;            /* Vermelho claro */
-            --green: #31b45a;                 /* Verde para online */
+            /* ---- FUNDO ---- */
+            --bg-body: #0b1219;
+            --bg-gradient-start: #1a2a38;
+            --bg-gradient-end: #070e14;
+            
+            /* ---- CARTÃO ---- */
+            --card: #eaf1f9;
+            --card-bg-start: #f0f6fc;
+            --card-bg-end: #d8e6f2;
+            --card-shadow: 0 16px 40px rgba(0, 20, 40, 0.4);
+            --card-border: #b8cfe0;
+            --card-border-top: #d6e8f5;
+            
+            /* ---- VISOR ---- */
+            --vis-bg: #dce8f2;
+            --vis-border: #b0c8dc;
+            
+            /* ---- TEXTOS ---- */
+            --text-dark: #1a4a6b;
+            --text-light: #2a5f7a;
+            --text-muted: #666;
+            
+            /* ---- CORES LABVIEW ---- */
+            --cyan: #1a8bc0;
+            --cyan-light: #4fc3f7;
+            --cyan-bright: #80d8ff;
+            --red: #e06060;
+            --red-dark: #b83030;
+            --red-bright: #ff8a8a;
+            --green: #31b45a;
             --green-light: #6fde8f;
             --yellow: #ffcc00;
-            --btn-gray: #d0dce8;              /* Cinza para botões */
-            --text-dark: #1a4a6b;             /* Texto escuro */
-            --text-light: #2a5f7a;            /* Texto claro */
-            --border-color: #b0c8dc;          /* Cor das bordas */
+            
+            /* ---- BOTÕES ---- */
+            --btn-gray: #d0dce8;
+            --btn-gray-hover: #c8d8e8;
+            --btn-border: #b0c8dc;
+            
+            /* ---- INSTRUMENTOS ---- */
+            --instrument-bg-start: rgba(255,255,255,0.5);
+            --instrument-bg-end: rgba(220,232,242,0.5);
+            --instrument-border: #b0c8dc;
+            
+            /* ---- MODAL ---- */
+            --modal-overlay: rgba(0, 0, 0, 0.8);
+            
+            /* ---- TOGGLE ---- */
+            --toggle-bg: rgba(255,255,255,0.3);
+            --toggle-border: #b0c8dc;
         }
-        
+
+        /* ================================================================
+           TEMA ESCURO
+           ================================================================ */
+        [data-theme="dark"] {
+            --bg-body: #0a0a0b;
+            --bg-gradient-start: #141416;
+            --bg-gradient-end: #080808;
+            
+            --card: #141416;
+            --card-bg-start: #1a1a1e;
+            --card-bg-end: #0e0e10;
+            --card-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+            --card-border: #2a2a2e;
+            --card-border-top: #333338;
+            
+            --vis-bg: #0a0a0c;
+            --vis-border: #222228;
+            
+            --text-dark: #d0d8e0;
+            --text-light: #8899aa;
+            --text-muted: #555;
+            
+            --cyan: #4fc3f7;
+            --cyan-light: #80d8ff;
+            --cyan-bright: #a0e0ff;
+            --red: #ff6b6b;
+            --red-dark: #cc4444;
+            --red-bright: #ff8a8a;
+            --green: #4ade80;
+            --green-light: #86efac;
+            --yellow: #fbbf24;
+            
+            --btn-gray: #1f1f22;
+            --btn-gray-hover: #2a2a2e;
+            --btn-border: #333338;
+            
+            --instrument-bg-start: rgba(255,255,255,0.05);
+            --instrument-bg-end: rgba(255,255,255,0.02);
+            --instrument-border: #2a2a2e;
+            
+            --modal-overlay: rgba(0, 0, 0, 0.9);
+            
+            --toggle-bg: rgba(255,255,255,0.05);
+            --toggle-border: #333338;
+        }
+
+        /* ================================================================
+           ESTILOS GERAIS
+           ================================================================ */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body {
             font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            background: radial-gradient(ellipse at 30% 40%, #1a2a38, #070e14);
+            background: var(--bg-body);
+            background: radial-gradient(ellipse at 30% 40%, var(--bg-gradient-start), var(--bg-gradient-end));
             color: var(--text-dark);
             padding: 5px;
             display: flex;
             justify-content: center;
             min-height: 100vh;
+            transition: background 0.4s ease, color 0.3s ease;
         }
         
         .container {
@@ -51,92 +132,68 @@
             background: var(--card);
             background: linear-gradient(165deg, var(--card-bg-start), var(--card-bg-end));
             border-radius: 28px;
-            border: 1px solid var(--border-color);
-            border-top-color: #d6e8f5;
+            border: 1px solid var(--card-border);
+            border-top-color: var(--card-border-top);
             display: flex;
             flex-direction: column;
             position: relative;
             min-height: 100vh;
-            box-shadow: 
-                0 16px 40px rgba(0, 20, 40, 0.4),
-                inset 0 2px 0 rgba(255,255,255,0.7),
-                inset 0 -4px 8px rgba(0,0,0,0.08);
+            box-shadow: var(--card-shadow), inset 0 2px 0 rgba(255,255,255,0.07), inset 0 -4px 8px rgba(0,0,0,0.08);
+            transition: background 0.4s ease, border 0.3s ease, box-shadow 0.3s ease;
         }
         
-        .lockdown-overlay {
-            display: none;
-            position: absolute;
-            inset: 0;
-            background: rgba(255, 0, 0, 0.10);
-            border-radius: 28px;
-            z-index: 999;
-            pointer-events: none;
-            animation: pulseOverlay 2s infinite;
-        }
-        .lockdown-overlay.active { display: block; }
-        
-        @keyframes pulseOverlay {
-            0%, 100% { background: rgba(224, 96, 96, 0.08); }
-            50% { background: rgba(224, 96, 96, 0.20); }
+        [data-theme="dark"] .container {
+            box-shadow: var(--card-shadow), inset 0 2px 0 rgba(255,255,255,0.03), inset 0 -4px 8px rgba(0,0,0,0.4);
         }
         
-        .lockdown-watermark {
-            position: fixed;
-            bottom: 15px;
-            left: 15px;
-            z-index: 1000;
-            background: transparent;
-            border: none;
-            color: rgba(26, 74, 107, 0.15);
-            font-size: 0.55rem;
-            font-weight: 300;
-            letter-spacing: 2px;
+        /* ================================================================
+           BOTÃO TEMA (CLARO/ESCURO)
+           ================================================================ */
+        .theme-toggle-btn {
+            background: var(--btn-gray);
+            color: var(--text-dark);
+            border: 1px solid var(--btn-border);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
-            user-select: none;
+            font-size: 0.9rem;
+            transition: 0.3s ease;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
+            padding: 0;
         }
-        .lockdown-watermark:hover {
-            color: rgba(26, 74, 107, 0.35);
-            background: rgba(255, 255, 255, 0.5);
+        .theme-toggle-btn:hover {
+            background: var(--btn-gray-hover);
+            transform: scale(1.05);
         }
-        .lockdown-watermark.active {
-            color: rgba(224, 96, 96, 0.50);
-            animation: watermarkPulse 1.5s infinite;
+        [data-theme="dark"] .theme-toggle-btn {
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
         }
-        .lockdown-watermark.active:hover { color: rgba(224, 96, 96, 0.80); }
-        
-        @keyframes watermarkPulse {
-            0%, 100% { color: rgba(224, 96, 96, 0.30); }
-            50% { color: rgba(224, 96, 96, 0.60); }
+        [data-theme="dark"] .theme-toggle-btn:hover {
+            background: var(--btn-gray-hover);
         }
-        
-        .lockdown-status {
-            position: fixed;
-            bottom: 50px;
-            left: 15px;
-            font-size: 0.5rem;
-            color: rgba(26, 74, 107, 0.15);
-            font-family: 'Courier New', monospace;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
-            pointer-events: none;
-        }
-        .lockdown-status.active { color: rgba(224, 96, 96, 0.40); }
-        
+
+        /* ================================================================
+           HEADER
+           ================================================================ */
         .header {
             background: rgba(255,255,255,0.3);
             padding: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid var(--border-color);
+            border-bottom: 2px solid var(--card-border);
             flex-wrap: wrap;
             gap: 5px;
             border-radius: 28px 28px 0 0;
+            transition: background 0.3s ease, border 0.3s ease;
+        }
+        [data-theme="dark"] .header {
+            background: rgba(255,255,255,0.03);
+            border-bottom-color: var(--card-border);
         }
         
         .header h1 {
@@ -146,6 +203,10 @@
             transition: all 0.3s ease;
             text-shadow: 0 1px 0 rgba(255,255,255,0.5);
         }
+        [data-theme="dark"] .header h1 {
+            text-shadow: 0 1px 0 rgba(0,0,0,0.3);
+        }
+        
         .header h1 .station-name {
             color: var(--cyan);
             font-size: 0.7rem;
@@ -161,15 +222,17 @@
         }
         .header h1 .station-status {
             font-size: 0.5rem;
-            color: #666;
+            color: var(--text-muted);
             font-weight: 300;
         }
         .header h1 .station-status.online { color: var(--green); }
-        .header h1 .station-status.offline { color: #666; }
-        .header h1 .manutencao-status {
-            font-size: 0.5rem;
-            color: var(--yellow);
-            font-weight: 300;
+        .header h1 .station-status.offline { color: var(--text-muted); }
+        
+        .header-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
         }
         
         .led-group { display: flex; gap: 8px; }
@@ -178,9 +241,10 @@
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            background: var(--border-color);
+            background: var(--card-border);
             margin: 0 auto 2px;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            transition: 0.3s;
         }
         #webLed.online {
             background: var(--cyan-light);
@@ -191,13 +255,34 @@
             box-shadow: 0 0 8px var(--green);
         }
         
-        .header-buttons {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            flex-wrap: wrap;
+        /* ================================================================
+           BOTÕES SECUNDÁRIOS (PADRÃO)
+           ================================================================ */
+        .btn-secondary {
+            background: var(--btn-gray);
+            color: var(--text-dark);
+            border: 1px solid var(--btn-border);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 4px rgba(0,0,0,0.05);
+            padding: 10px;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.65rem;
+            transition: 0.2s;
+        }
+        .btn-secondary:hover {
+            background: var(--btn-gray-hover);
+        }
+        [data-theme="dark"] .btn-secondary {
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 2px 4px rgba(0,0,0,0.3);
+        }
+        [data-theme="dark"] .btn-secondary:hover {
+            background: var(--btn-gray-hover);
         }
         
+        /* ================================================================
+           INSTRUMENTOS
+           ================================================================ */
         .instrument-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -206,13 +291,16 @@
         }
         
         .instrument {
-            background: rgba(255,255,255,0.4);
-            background: linear-gradient(180deg, rgba(255,255,255,0.5), rgba(220,232,242,0.5));
+            background: var(--instrument-bg-start);
+            background: linear-gradient(180deg, var(--instrument-bg-start), var(--instrument-bg-end));
             border-radius: 14px;
             padding: 10px;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--instrument-border);
             transition: 0.3s;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.04), 0 1px 0 rgba(255,255,255,0.7);
+        }
+        [data-theme="dark"] .instrument {
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2), 0 1px 0 rgba(255,255,255,0.02);
         }
         .instrument.lockdown {
             opacity: 0.3;
@@ -231,32 +319,39 @@
             font-weight: 300;
             text-transform: lowercase;
         }
-        .instrument .label .sensor-status.waiting { color: #888; }
+        .instrument .label .sensor-status.waiting { color: var(--text-muted); }
         .instrument .label .sensor-status.online { color: var(--green); }
         
         .visor-interno {
             background: var(--vis-bg);
             border-radius: 8px;
             padding: 5px 10px;
-            border-top: 1px solid #b0c8dc;
+            border-top: 1px solid var(--vis-border);
             box-shadow: inset 0 2px 5px rgba(0,0,0,0.08);
+            transition: background 0.3s ease, border 0.3s ease;
         }
+        [data-theme="dark"] .visor-interno {
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.4);
+        }
+        
         .display {
             font-size: 1.6rem;
             font-weight: 700;
             font-family: 'Courier New', monospace;
             color: var(--cyan);
             text-align: right;
+            transition: color 0.3s ease;
         }
-        .display.waiting { color: #999; }
+        .display.waiting { color: var(--text-muted); }
         
         .bar-wrap {
             height: 8px;
-            background: #d0dce8;
+            background: var(--vis-bg);
             border-radius: 4px;
             overflow: hidden;
             margin-top: 5px;
-            border: 1px solid #b0c8dc;
+            border: 1px solid var(--vis-border);
+            transition: background 0.3s ease, border 0.3s ease;
         }
         .bar-fill {
             height: 100%;
@@ -278,8 +373,8 @@
             width: 14px;
             height: 14px;
             border-radius: 50%;
-            background: var(--border-color);
-            border: 1px solid #a0b8cc;
+            background: var(--vis-border);
+            border: 1px solid var(--card-border);
             transition: 0.3s;
         }
         .alarm-on {
@@ -289,46 +384,19 @@
         }
         @keyframes pulse { 50% { opacity: 0.3; } }
         
-        .footer-btns {
-            padding: 10px;
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 8px;
-        }
-        
-        button {
-            padding: 10px;
-            font-weight: 700;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-size: 0.65rem;
-            transition: 0.2s;
-        }
-        .btn-secondary {
-            background: var(--btn-gray);
-            color: var(--text-dark);
-            border: 1px solid var(--border-color);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 4px rgba(0,0,0,0.05);
-        }
-        .btn-secondary:hover {
-            background: #c8d8e8;
-        }
-        
         .btn-toggle {
             padding: 4px 8px;
             font-size: 0.55rem;
             background: var(--btn-gray);
             color: var(--text-dark);
             min-width: 45px;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--btn-border);
             transition: 0.3s;
             cursor: pointer;
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+            border-radius: 4px;
         }
-        .btn-toggle:hover {
-            opacity: 0.8;
-        }
+        .btn-toggle:hover { opacity: 0.8; }
         .btn-active {
             background: var(--cyan-light);
             color: #000;
@@ -336,16 +404,106 @@
             box-shadow: 0 0 8px rgba(26, 139, 192, 0.3);
         }
         .btn-inactive {
-            background: #c8d8e8;
-            color: #666;
-            border-color: #a0b8cc;
+            background: var(--btn-gray);
+            color: var(--text-muted);
+            border-color: var(--btn-border);
+        }
+        [data-theme="dark"] .btn-active {
+            background: var(--cyan-light);
+            color: #000;
+            box-shadow: 0 0 12px rgba(79, 195, 247, 0.3);
         }
         
+        .footer-btns {
+            padding: 10px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+        
+        /* ================================================================
+           LOCKDOWN
+           ================================================================ */
+        .lockdown-overlay {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: rgba(224, 96, 96, 0.10);
+            border-radius: 28px;
+            z-index: 999;
+            pointer-events: none;
+            animation: pulseOverlay 2s infinite;
+        }
+        .lockdown-overlay.active { display: block; }
+        @keyframes pulseOverlay {
+            0%, 100% { background: rgba(224, 96, 96, 0.06); }
+            50% { background: rgba(224, 96, 96, 0.18); }
+        }
+        
+        .lockdown-watermark {
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            z-index: 1000;
+            background: transparent;
+            border: none;
+            color: rgba(26, 74, 107, 0.15);
+            font-size: 0.55rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            user-select: none;
+        }
+        [data-theme="dark"] .lockdown-watermark {
+            color: rgba(255, 255, 255, 0.08);
+        }
+        .lockdown-watermark:hover {
+            color: rgba(26, 74, 107, 0.35);
+            background: rgba(255, 255, 255, 0.5);
+        }
+        [data-theme="dark"] .lockdown-watermark:hover {
+            color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.03);
+        }
+        .lockdown-watermark.active {
+            color: rgba(224, 96, 96, 0.50);
+            animation: watermarkPulse 1.5s infinite;
+        }
+        .lockdown-watermark.active:hover { color: rgba(224, 96, 96, 0.80); }
+        @keyframes watermarkPulse {
+            0%, 100% { color: rgba(224, 96, 96, 0.30); }
+            50% { color: rgba(224, 96, 96, 0.60); }
+        }
+        
+        .lockdown-status {
+            position: fixed;
+            bottom: 50px;
+            left: 15px;
+            font-size: 0.5rem;
+            color: rgba(26, 74, 107, 0.15);
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        [data-theme="dark"] .lockdown-status {
+            color: rgba(255, 255, 255, 0.06);
+        }
+        .lockdown-status.active { color: rgba(224, 96, 96, 0.40); }
+        
+        /* ================================================================
+           MODAL
+           ================================================================ */
         .modal {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.8);
+            background: var(--modal-overlay);
             z-index: 1001;
             align-items: center;
             justify-content: center;
@@ -359,28 +517,29 @@
             border-radius: 28px;
             width: 90%;
             max-width: 450px;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--card-border);
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 16px 40px rgba(0, 20, 40, 0.4);
+            box-shadow: var(--card-shadow);
+            transition: background 0.4s ease, border 0.3s ease;
         }
         
         input {
             width: 100%;
             padding: 8px;
             background: var(--vis-bg);
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--vis-border);
             color: var(--text-dark);
             margin-bottom: 8px;
             border-radius: 5px;
             outline: none;
             font-size: 0.8rem;
+            transition: background 0.3s ease, border 0.3s ease, color 0.3s ease;
         }
         input:focus {
             border-color: var(--cyan-light);
             box-shadow: 0 0 8px rgba(26, 139, 192, 0.2);
         }
-        
         .modal label {
             font-size: 0.65rem;
             color: var(--text-light);
@@ -394,20 +553,15 @@
             border-radius: 8px;
             padding: 10px;
             margin: 8px 0;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--vis-border);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: background 0.3s ease, border 0.3s ease;
         }
         .api-status .status-label {
             font-size: 0.65rem;
             color: var(--text-light);
-        }
-        .api-status .status-label .flag { margin-right: 4px; }
-        .api-status .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
         .api-status .status-dot {
             width: 8px;
@@ -428,7 +582,8 @@
             margin: 8px 0;
             max-height: 200px;
             overflow-y: auto;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--vis-border);
+            transition: background 0.3s ease, border 0.3s ease;
         }
         .phone-item, .mac-item {
             display: flex;
@@ -436,13 +591,14 @@
             align-items: center;
             padding: 6px 8px;
             margin: 3px 0;
-            background: rgba(255,255,255,0.3);
+            background: var(--instrument-bg-start);
             border-radius: 4px;
             font-size: 0.7rem;
             color: var(--text-dark);
             border-left: 2px solid var(--cyan);
             flex-wrap: wrap;
             gap: 4px;
+            transition: background 0.3s ease;
         }
         .phone-item .phone-number, .mac-item .mac-address {
             flex: 1;
@@ -460,10 +616,14 @@
             border: 1px solid var(--green);
         }
         .phone-item .phone-status.inactive {
-            color: #666;
+            color: var(--text-muted);
             background: rgba(255, 255, 255, 0.3);
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--vis-border);
         }
+        [data-theme="dark"] .phone-item .phone-status.inactive {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
         .phone-item .toggle-phone-btn, .mac-item .remove-mac-btn {
             padding: 4px 10px;
             border-radius: 4px;
@@ -481,9 +641,6 @@
             background: var(--red);
             color: #fff;
         }
-        .phone-item .toggle-phone-btn:hover, .mac-item .remove-mac-btn:hover {
-            opacity: 0.8;
-        }
         .phone-item .remove-phone, .mac-item .remove-mac-btn {
             background: var(--red);
             color: #fff;
@@ -492,15 +649,6 @@
             padding: 4px 10px;
             font-size: 0.5rem;
             cursor: pointer;
-        }
-        .phone-item .remove-phone:hover { opacity: 0.8; }
-        .mac-item .mac-status {
-            font-size: 0.5rem;
-            color: var(--green);
-            padding: 2px 8px;
-            border-radius: 10px;
-            background: rgba(49, 180, 90, 0.1);
-            border: 1px solid var(--green);
         }
         
         .counter {
@@ -529,6 +677,10 @@
             width: 100%;
             margin-top: 5px;
             font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
         }
         .btn-add:disabled {
             opacity: 0.5;
@@ -539,16 +691,22 @@
             color: #fff;
             width: 100%;
             margin-top: 5px;
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
         }
+        
         .input-wrapper {
             display: flex;
             align-items: center;
             gap: 5px;
             background: var(--vis-bg);
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--vis-border);
             border-radius: 5px;
             padding: 0 5px;
             margin-bottom: 8px;
+            transition: background 0.3s ease, border 0.3s ease;
         }
         .input-wrapper .prefix {
             color: var(--cyan);
@@ -569,6 +727,41 @@
             box-shadow: none;
         }
         
+        .toggle-group {
+            display: flex;
+            gap: 10px;
+            margin: 8px 0;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .toggle-btn {
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: 2px solid var(--toggle-border);
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            background: var(--toggle-bg);
+            color: var(--text-light);
+        }
+        .toggle-btn.active-sms {
+            border-color: var(--cyan-light);
+            background: rgba(26, 139, 192, 0.15);
+            color: var(--cyan);
+        }
+        .toggle-btn.active-whats {
+            border-color: #25D366;
+            background: rgba(37, 211, 102, 0.15);
+            color: #25D366;
+        }
+        .toggle-btn.inactive {
+            border-color: var(--toggle-border);
+            background: var(--toggle-bg);
+            color: var(--text-muted);
+        }
+        .toggle-btn .icon { margin-right: 4px; }
+        
         .lockdown-modal .modal-content {
             border: 2px solid rgba(224, 96, 96, 0.3);
             text-align: center;
@@ -578,10 +771,6 @@
             font-size: 1.2rem;
             margin-bottom: 10px;
             text-transform: uppercase;
-        }
-        .lockdown-modal .modal-content .icon {
-            font-size: 3rem;
-            margin: 10px 0;
         }
         .btn-lockdown-confirm {
             background: var(--red);
@@ -602,7 +791,7 @@
             font-size: 0.9rem;
             font-weight: 700;
             border-radius: 8px;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--btn-border);
             cursor: pointer;
             margin-top: 5px;
         }
@@ -613,44 +802,9 @@
             display: none;
         }
         
-        .toggle-group {
-            display: flex;
-            gap: 10px;
-            margin: 8px 0;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        .toggle-btn {
-            padding: 6px 16px;
-            border-radius: 20px;
-            border: 2px solid var(--border-color);
-            font-size: 0.7rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-            background: rgba(255,255,255,0.3);
-            color: var(--text-light);
-        }
-        .toggle-btn.active-sms {
-            border-color: var(--cyan-light);
-            background: rgba(26, 139, 192, 0.15);
-            color: var(--cyan);
-        }
-        .toggle-btn.active-whats {
-            border-color: #25D366;
-            background: rgba(37, 211, 102, 0.15);
-            color: #25D366;
-        }
-        .toggle-btn.inactive {
-            border-color: var(--border-color);
-            background: rgba(255,255,255,0.2);
-            color: #888;
-        }
-        .toggle-btn .icon { margin-right: 4px; }
-        
         .status-sync {
             font-size: 0.45rem;
-            color: #888;
+            color: var(--text-muted);
             text-align: center;
             margin-top: 2px;
             transition: 0.3s;
@@ -705,16 +859,15 @@
             .instrument-grid { gap: 5px; padding: 5px; }
             .instrument { padding: 6px; }
             .footer-btns { grid-template-columns: 1fr 1fr; }
-            .phone-item, .mac-item { flex-wrap: wrap; gap: 4px; }
-            .phone-item .phone-number, .mac-item .mac-address { font-size: 0.6rem; }
-            .phone-item .toggle-phone-btn { font-size: 0.45rem; padding: 3px 8px; min-width: 55px; }
+            .header h1 { font-size: 0.7rem; }
         }
     </style>
 </head>
 <body>
-    <!-- ===== CORPO DA PÁGINA ===== -->
+    <!-- ===== TOAST ===== -->
     <div id="toast" class="toast">✅ Lista de telefones sincronizada com o ESP</div>
     
+    <!-- ===== CONTAINER PRINCIPAL ===== -->
     <div class="container" id="mainContainer">
         <div class="lockdown-overlay" id="lockdownOverlay"></div>
         
@@ -730,6 +883,7 @@
                     <div class="led-item"><div id="webLed" class="led"></div>WEB</div>
                     <div class="led-item"><div id="stationLed" class="led"></div>EST</div>
                 </div>
+                <button id="themeBtn" class="theme-toggle-btn" onclick="toggleTheme()" title="Alternar tema">🌓</button>
                 <button id="fullBtn" onclick="toggleFullscreen()" class="btn-secondary" title="Tela Cheia">⛶</button>
                 <button id="muteBtn" onclick="toggleMute()" class="btn-secondary">MUTE</button>
             </div>
@@ -737,7 +891,6 @@
         
         <!-- ===== INSTRUMENTOS ===== -->
         <div class="instrument-grid">
-            <!-- GÁS -->
             <div class="instrument" id="instGas">
                 <div class="label">GÁS (PPM) <span class="sensor-status waiting" id="gasStatus">⏳</span></div>
                 <div class="visor-interno"><div class="display waiting" id="gasV">----</div><div class="bar-wrap"><div id="gasB" class="bar-fill waiting"></div></div></div>
@@ -747,8 +900,6 @@
                 </div>
                 <div class="status-sync" id="gasSync">🔄 sincronizado</div>
             </div>
-            
-            <!-- TEMP -->
             <div class="instrument" id="instTemp">
                 <div class="label">TEMP (°C) <span class="sensor-status waiting" id="tempStatus">⏳</span></div>
                 <div class="visor-interno"><div class="display waiting" id="tempV">--.-</div><div class="bar-wrap"><div id="tempB" class="bar-fill waiting"></div></div></div>
@@ -758,8 +909,6 @@
                 </div>
                 <div class="status-sync" id="tempSync">🔄 sincronizado</div>
             </div>
-            
-            <!-- VAZÃO -->
             <div class="instrument" id="instFlow">
                 <div class="label">VAZÃO (L/M) <span class="sensor-status waiting" id="flowStatus">⏳</span></div>
                 <div class="visor-interno"><div class="display waiting" id="flowV">--.-</div><div class="bar-wrap"><div id="flowB" class="bar-fill waiting"></div></div></div>
@@ -769,8 +918,6 @@
                 </div>
                 <div class="status-sync" id="flowSync">🔄 sincronizado</div>
             </div>
-            
-            <!-- PRESSÃO -->
             <div class="instrument" id="instPress">
                 <div class="label">PRESS (BAR) <span class="sensor-status waiting" id="pressStatus">⏳</span></div>
                 <div class="visor-interno"><div class="display waiting" id="pressV">--.--</div><div class="bar-wrap"><div id="pressB" class="bar-fill waiting"></div></div></div>
@@ -780,8 +927,6 @@
                 </div>
                 <div class="status-sync" id="pressSync">🔄 sincronizado</div>
             </div>
-            
-            <!-- NÍVEL -->
             <div class="instrument" id="instNivel">
                 <div class="label">NÍVEL (%) <span class="sensor-status waiting" id="nivelStatus">⏳</span></div>
                 <div class="visor-interno"><div class="display waiting" id="nivelV">--.-</div><div class="bar-wrap"><div id="nivelB" class="bar-fill waiting"></div></div></div>
@@ -791,8 +936,6 @@
                 </div>
                 <div class="status-sync" id="nivelSync">🔄 sincronizado</div>
             </div>
-            
-            <!-- PRESENÇA -->
             <div class="instrument" id="instPres">
                 <div class="label">PRESENÇA <span class="sensor-status waiting" id="presStatus">⏳</span></div>
                 <div class="visor-interno"><div class="display waiting" id="presV" style="text-align:center; font-size:1.1rem;">⏳</div></div>
@@ -845,7 +988,7 @@
                 </div>
             </div>
 
-            <hr style="border:0; border-top:1px solid var(--border-color); margin:10px 0;">
+            <hr style="border:0; border-top:1px solid var(--card-border); margin:10px 0;">
             
             <label>SP GÁS</label><input type="number" id="s1">
             <label>SP TEMP</label><input type="number" id="s2">
@@ -853,9 +996,8 @@
             <label>SP PRESS</label><input type="number" id="s4" step="0.1">
             <label>SP NÍVEL</label><input type="number" id="s5">
             <label>ZERO GÁS</label><input type="number" id="s6">
-            <hr style="border:0; border-top:1px solid var(--border-color); margin:10px 0;">
+            <hr style="border:0; border-top:1px solid var(--card-border); margin:10px 0;">
             
-            <!-- CONTROLE DE NOTIFICAÇÕES -->
             <div style="margin-bottom:10px;">
                 <label style="color:var(--cyan);">📱 CONTROLE DE NOTIFICAÇÕES</label>
                 <div class="toggle-group">
@@ -871,7 +1013,6 @@
                 </div>
             </div>
 
-            <!-- STATUS API SMS -->
             <div style="margin-bottom:10px;">
                 <label style="color:var(--green);">📡 STATUS DA API SMS</label>
                 <div class="api-status">
@@ -883,8 +1024,7 @@
                 </div>
             </div>
 
-            <!-- TÉCNICOS AUTORIZADOS -->
-            <div style="border-top:1px solid var(--border-color); padding-top:10px; margin-top:10px;">
+            <div style="border-top:1px solid var(--card-border); padding-top:10px; margin-top:10px;">
                 <label style="color:var(--yellow);">🔧 TÉCNICOS AUTORIZADOS (MAC Bluetooth)</label>
                 <div class="counter">
                     <span id="macCount">0</span> / 10 MACs cadastrados
@@ -904,11 +1044,10 @@
                     <button onclick="addMac()" id="addMacBtn" class="btn-add" style="flex:1;">➕ ADICIONAR MAC</button>
                     <button onclick="removeAllMacs()" class="btn-remove-all" style="flex:1;">🗑️ REMOVER TODOS</button>
                 </div>
-                <button onclick="syncMacsFromESP()" style="background:var(--btn-gray); color:var(--text-dark); width:100%; margin-top:5px; border:1px solid var(--border-color);">🔄 SINCRONIZAR DO ESP</button>
+                <button onclick="syncMacsFromESP()" style="background:var(--btn-gray); color:var(--text-dark); width:100%; margin-top:5px; border:1px solid var(--btn-border); border-radius:8px; padding:10px; cursor:pointer;">🔄 SINCRONIZAR DO ESP</button>
             </div>
 
-            <!-- TELEFONES -->
-            <div style="border-top:1px solid var(--border-color); padding-top:10px; margin-top:10px;">
+            <div style="border-top:1px solid var(--card-border); padding-top:10px; margin-top:10px;">
                 <label style="color:var(--green);">📱 TELEFONES CADASTRADOS</label>
                 <div class="counter">
                     <span id="phoneCount">0</span> / 10 números
@@ -928,15 +1067,43 @@
                     <button onclick="addPhone()" id="addPhoneBtn" class="btn-add" style="flex:1;">➕ ADICIONAR</button>
                     <button onclick="removeAllPhones()" class="btn-remove-all" style="flex:1;">🗑️ REMOVER TODOS</button>
                 </div>
-                <button onclick="syncPhonesFromESP()" style="background:var(--btn-gray); color:var(--text-dark); width:100%; margin-top:5px; border:1px solid var(--border-color);">🔄 SINCRONIZAR DO ESP</button>
+                <button onclick="syncPhonesFromESP()" style="background:var(--btn-gray); color:var(--text-dark); width:100%; margin-top:5px; border:1px solid var(--btn-border); border-radius:8px; padding:10px; cursor:pointer;">🔄 SINCRONIZAR DO ESP</button>
             </div>
-            <button onclick="save()" style="background:var(--cyan-light); color:#000; width:100%; margin-top:5px;">💾 SALVAR CONFIGURAÇÕES</button>
-            <button onclick="document.getElementById('modal').style.display='none'" style="background:none; color:var(--text-light); width:100%; margin-top:5px;">VOLTAR</button>
+            <button onclick="save()" style="background:var(--cyan-light); color:#000; width:100%; margin-top:5px; border:none; border-radius:8px; padding:10px; font-weight:700; cursor:pointer;">💾 SALVAR CONFIGURAÇÕES</button>
+            <button onclick="document.getElementById('modal').style.display='none'" style="background:none; color:var(--text-light); width:100%; margin-top:5px; border:none; padding:10px; cursor:pointer;">VOLTAR</button>
         </div>
     </div>
 
     <script>
-        // ===== JAVASCRIPT (mesmo código original, sem alterações) =====
+        // ===== FUNÇÃO PARA ALTERNAR TEMA =====
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn = document.getElementById('themeBtn');
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.removeAttribute('data-theme');
+                btn.textContent = '🌓';
+                localStorage.setItem('wellguard_theme', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                btn.textContent = '☀️';
+                localStorage.setItem('wellguard_theme', 'dark');
+            }
+        }
+
+        // ===== CARREGAR TEMA SALVO =====
+        function loadTheme() {
+            const saved = localStorage.getItem('wellguard_theme');
+            const btn = document.getElementById('themeBtn');
+            if (saved === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                btn.textContent = '☀️';
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                btn.textContent = '🌓';
+            }
+        }
+
+        // ===== JAVASCRIPT PRINCIPAL =====
         const client = mqtt.connect("wss://broker.emqx.io:8084/mqtt");
         let audioCtx = null, sirenInterval = null, isMuted = false;
         const sensorStatus = { gas: true, temp: true, flow: true, press: true, nivel: true, pres: true };
@@ -1223,8 +1390,8 @@
             
             const statusText = smsEnabled ? 'ON' : 'OFF';
             footerBtn.textContent = `📱 SMS: ${statusText}`;
-            footerBtn.style.borderColor = smsEnabled ? 'var(--cyan-light)' : 'var(--border-color)';
-            footerBtn.style.color = smsEnabled ? 'var(--cyan)' : 'var(--text-light)';
+            footerBtn.style.borderColor = smsEnabled ? 'var(--cyan-light)' : 'var(--btn-border)';
+            footerBtn.style.color = smsEnabled ? 'var(--cyan)' : 'var(--text-muted)';
         }
 
         function toggleNotification(type) {
@@ -1348,6 +1515,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', function () {
+            loadTheme();
             document.getElementById('lockdownPassword').addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') confirmLockdown();
             });
@@ -1565,6 +1733,7 @@
         }
 
         window.onload = () => {
+            loadTheme();
             const keys = ['s1', 's2', 's3', 's4', 's5', 's6'];
             const defaults = [2000, 50, 10, 4, 80, 0];
             keys.forEach((k, i) => {
