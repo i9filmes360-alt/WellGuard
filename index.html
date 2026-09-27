@@ -1,933 +1,165 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#0f172a">
-<title>Meu Calendário</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-    * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-        -webkit-tap-highlight-color: transparent;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Não é possível acessar esse site - WellGuard</title>
+    <style>
+        /* Reset básico */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    html, body {
-        height: 100%;
-        overflow-x: hidden;
-    }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #fff;
+            color: #202124;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
+        }
 
-    body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
-        background-attachment: fixed;
-        min-height: 100vh;
-        min-height: 100dvh;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        padding: 12px;
-        color: #e2e8f0;
-        -webkit-font-smoothing: antialiased;
-    }
-
-    .container {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        width: 100%;
-        max-width: 480px;
-        margin: 0 auto;
-    }
-
-    /* ===== RELÓGIO ===== */
-    .relogio-card {
-        background: rgba(255, 255, 255, 0.06);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 22px;
-        padding: 20px;
-        text-align: center;
-        box-shadow: 0 15px 35px -12px rgba(0, 0, 0, 0.5);
-        animation: fadeInUp 0.6s ease-out;
-    }
-
-    .relogio-card .icone-relogio {
-        font-size: 24px;
-        margin-bottom: 4px;
-        display: block;
-    }
-
-    .relogio-card .hora {
-        font-size: 42px;
-        font-weight: 700;
-        color: #f8fafc;
-        letter-spacing: 1px;
-        line-height: 1.1;
-        font-variant-numeric: tabular-nums;
-        text-shadow: 0 0 30px rgba(96, 165, 250, 0.3);
-    }
-
-    .relogio-card .hora .ampm {
-        font-size: 16px;
-        font-weight: 600;
-        color: #60a5fa;
-        margin-left: 4px;
-        vertical-align: middle;
-    }
-
-    .relogio-card .data-relogio {
-        margin-top: 8px;
-        font-size: 13px;
-        color: #94a3b8;
-        font-weight: 500;
-    }
-
-    .relogio-card .saudacao {
-        margin-top: 12px;
-        font-size: 12px;
-        color: #60a5fa;
-        font-weight: 600;
-        background: rgba(96, 165, 250, 0.1);
-        display: inline-block;
-        padding: 5px 14px;
-        border-radius: 100px;
-        border: 1px solid rgba(96, 165, 250, 0.15);
-    }
-
-    /* ===== CALENDÁRIO ===== */
-    .calendario {
-        background: rgba(255, 255, 255, 0.06);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 22px;
-        overflow: hidden;
-        box-shadow: 0 15px 35px -12px rgba(0, 0, 0, 0.5);
-        animation: fadeInUp 0.6s ease-out 0.1s both;
-        position: relative;
-    }
-
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .cabecalho {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
-        padding: 16px 18px;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .cabecalho::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle at 30% 40%, rgba(255,255,255,0.12) 0%, transparent 60%);
-        pointer-events: none;
-    }
-
-    .cabecalho h1 {
-        font-size: 17px;
-        font-weight: 700;
-        color: white;
-        margin-bottom: 12px;
-        letter-spacing: -0.3px;
-        position: relative;
-    }
-
-    .navegacao {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: relative;
-    }
-
-    .navegacao button {
-        width: 42px;
-        height: 42px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.12);
-        color: white;
-        font-size: 20px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        backdrop-filter: blur(4px);
-        flex-shrink: 0;
-    }
-
-    .navegacao button:active {
-        transform: scale(0.92);
-        background: rgba(255, 255, 255, 0.3);
-    }
-
-    #mesAno {
-        font-size: 16px;
-        font-weight: 600;
-        color: white;
-        text-transform: capitalize;
-        letter-spacing: 0.2px;
-    }
-
-    .semana {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        background: rgba(255, 255, 255, 0.04);
-        padding: 10px 8px 4px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    }
-
-    .semana div {
-        text-align: center;
-        font-weight: 600;
-        color: #94a3b8;
-        padding: 4px 0;
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-    }
-
-    .semana div:first-child {
-        color: #fb923c;
-    }
-
-    .dias {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 3px;
-        padding: 8px;
-    }
-
-    .dia {
-        aspect-ratio: 1 / 1;
-        min-height: auto;
-        border: 1px solid rgba(255, 255, 255, 0.07);
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.04);
-        cursor: pointer;
-        padding: 0;
-        position: relative;
-        transition: all 0.15s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .dia:active:not(.vazio) {
-        transform: scale(0.92);
-        background: rgba(96, 165, 250, 0.25);
-        border-color: rgba(96, 165, 250, 0.6);
-    }
-
-    .dia.vazio {
-        background: transparent;
-        cursor: default;
-        border: 1px solid transparent;
-    }
-
-    .numero {
-        font-size: 14px;
-        font-weight: 600;
-        color: #cbd5e1;
-    }
-
-    /* Domingo - número laranja */
-    .domingo .numero {
-        color: #fb923c;
-    }
-
-    /* Feriado - número e fundo vermelho */
-    .feriado {
-        background: rgba(239, 68, 68, 0.18) !important;
-        border-color: rgba(239, 68, 68, 0.5) !important;
-    }
-
-    .feriado .numero {
-        color: #fca5a5 !important;
-    }
-
-    .feriado:active:not(.vazio) {
-        background: rgba(239, 68, 68, 0.35) !important;
-        transform: scale(0.92);
-    }
-
-    /* Feriado que também é hoje */
-    .feriado.hoje {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
-        border-color: #ef4444 !important;
-    }
-
-    .feriado.hoje .numero {
-        color: white !important;
-    }
-
-    .hoje {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
-        border-color: #3b82f6 !important;
-        box-shadow: 0 3px 15px -3px rgba(59, 130, 246, 0.6);
-    }
-
-    .hoje .numero {
-        color: white;
-    }
-
-    /* Domingo que também é hoje */
-    .hoje.domingo .numero {
-        color: white;
-    }
-
-    .selecionado {
-        box-shadow: inset 0 0 0 2px #fbbf24, 0 0 15px -3px rgba(251, 191, 36, 0.4) !important;
-        border-color: #fbbf24 !important;
-    }
-
-    .tem-evento::after {
-        content: "";
-        position: absolute;
-        bottom: 4px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 4px;
-        height: 4px;
-        background: #f87171;
-        border-radius: 50%;
-        box-shadow: 0 0 6px rgba(248, 113, 113, 0.8);
-    }
-
-    .feriado.tem-evento::after {
-        background: #fbbf24;
-        box-shadow: 0 0 6px rgba(251, 191, 36, 0.8);
-    }
-
-    /* ===== BALÃO ESTILO HQ ===== */
-    .balao-hq {
-        position: absolute;
-        background: #fef3c7;
-        color: #1f2937;
-        border: 2.5px solid #1f2937;
-        border-radius: 18px;
-        padding: 12px 16px;
-        font-size: 13px;
-        font-weight: 700;
-        font-family: 'Inter', sans-serif;
-        text-align: center;
-        z-index: 100;
-        box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
-        max-width: 200px;
-        line-height: 1.3;
-        opacity: 0;
-        transform: scale(0.5) translateY(10px);
-        pointer-events: none;
-        transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-        letter-spacing: 0.2px;
-    }
-
-    .balao-hq.ativo {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
-
-    /* Rabinho do balão (apontando pra baixo) */
-    .balao-hq::after {
-        content: '';
-        position: absolute;
-        bottom: -14px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 0;
-        height: 0;
-        border-left: 10px solid transparent;
-        border-right: 10px solid transparent;
-        border-top: 14px solid #1f2937;
-    }
-
-    .balao-hq::before {
-        content: '';
-        position: absolute;
-        bottom: -10px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 0;
-        height: 0;
-        border-left: 8px solid transparent;
-        border-right: 8px solid transparent;
-        border-top: 12px solid #fef3c7;
-        z-index: 1;
-    }
-
-    .balao-hq .emoji-balao {
-        display: block;
-        font-size: 18px;
-        margin-bottom: 3px;
-    }
-
-    /* ===== ÁREA DE EVENTOS ===== */
-    .area-evento {
-        padding: 14px 16px 16px;
-        border-top: 1px solid rgba(255, 255, 255, 0.06);
-        background: rgba(15, 23, 42, 0.4);
-    }
-
-    .area-evento h2 {
-        font-size: 13px;
-        font-weight: 600;
-        margin-bottom: 10px;
-        color: #94a3b8;
-    }
-
-    #dataSelecionada {
-        color: #60a5fa;
-        font-weight: 700;
-    }
-
-    textarea {
-        width: 100%;
-        height: 70px;
-        resize: none;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        padding: 12px;
-        font-family: 'Inter', sans-serif;
-        font-size: 14px;
-        outline: none;
-        background: rgba(255, 255, 255, 0.05);
-        color: #e2e8f0;
-        transition: all 0.2s ease;
-        line-height: 1.5;
-    }
-
-    textarea::placeholder { color: #64748b; }
-
-    textarea:focus {
-        border-color: #3b82f6;
-        background: rgba(59, 130, 246, 0.08);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-    }
-
-    .botoes {
-        display: flex;
-        gap: 8px;
-        margin-top: 10px;
-    }
-
-    .botoes button {
-        flex: 1;
-        padding: 13px 8px;
-        border: none;
-        border-radius: 12px;
-        cursor: pointer;
-        font-size: 13px;
-        font-weight: 600;
-        transition: all 0.2s ease;
-        font-family: 'Inter', sans-serif;
-    }
-
-    .botoes button:active { transform: scale(0.96); }
-
-    .salvar {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        color: white;
-        box-shadow: 0 4px 12px -4px rgba(59, 130, 246, 0.5);
-    }
-
-    .apagar {
-        background: rgba(239, 68, 68, 0.15);
-        color: #f87171;
-        border: 1px solid rgba(239, 68, 68, 0.3);
-    }
-
-    /* ===== TELAS PEQUENAS ===== */
-    @media (max-width: 360px) {
-        body { padding: 8px; }
-        .container { gap: 8px; }
-        .relogio-card { padding: 16px; border-radius: 18px; }
-        .relogio-card .hora { font-size: 34px; }
-        .relogio-card .hora .ampm { font-size: 14px; }
-        .relogio-card .data-relogio { font-size: 12px; }
-        .calendario { border-radius: 18px; }
-        .cabecalho { padding: 12px 14px; }
-        .cabecalho h1 { font-size: 15px; margin-bottom: 10px; }
-        #mesAno { font-size: 14px; }
-        .navegacao button { width: 38px; height: 38px; font-size: 18px; border-radius: 10px; }
-        .dias { gap: 2px; padding: 6px; }
-        .dia { border-radius: 8px; }
-        .numero { font-size: 12px; }
-        .semana div { font-size: 9px; }
-        .area-evento { padding: 12px; }
-        .area-evento h2 { font-size: 12px; }
-        textarea { font-size: 13px; height: 60px; }
-        .botoes button { padding: 11px 6px; font-size: 12px; }
-        .balao-hq { font-size: 11px; padding: 10px 12px; max-width: 160px; }
-    }
-
-    /* ===== TELAS GRANDES ===== */
-    @media (min-width: 768px) {
-        body { align-items: center; padding: 24px; }
         .container {
-            flex-direction: row;
-            max-width: 1050px;
-            gap: 24px;
-            align-items: flex-start;
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 10vh;
         }
-        .relogio-card {
-            width: 300px;
-            min-width: 300px;
-            padding: 35px 30px;
-            border-radius: 28px;
-        }
-        .relogio-card .icone-relogio { font-size: 32px; margin-bottom: 10px; }
-        .relogio-card .hora { font-size: 56px; letter-spacing: 2px; }
-        .relogio-card .hora .ampm { font-size: 22px; margin-left: 6px; }
-        .relogio-card .data-relogio { font-size: 15px; margin-top: 12px; }
-        .relogio-card .saudacao { font-size: 14px; margin-top: 18px; padding: 6px 18px; }
-        .calendario { flex: 1; border-radius: 28px; }
-        .cabecalho { padding: 22px 24px; }
-        .cabecalho h1 { font-size: 24px; margin-bottom: 16px; }
-        #mesAno { font-size: 20px; }
-        .navegacao button { width: 46px; height: 46px; font-size: 22px; border-radius: 14px; }
-        .semana { padding: 12px 14px 6px; }
-        .semana div { font-size: 12px; letter-spacing: 0.8px; padding: 8px 0; }
-        .dias { gap: 6px; padding: 14px; }
-        .dia {
-            aspect-ratio: auto;
-            min-height: 72px;
-            border-radius: 14px;
-            padding: 9px;
-            justify-content: flex-start;
-            align-items: flex-start;
-        }
-        .numero { font-size: 16px; }
-        .tem-evento::after { width: 6px; height: 6px; bottom: 9px; }
-        .area-evento { padding: 20px 24px 24px; }
-        .area-evento h2 { font-size: 16px; margin-bottom: 12px; }
-        textarea { height: 80px; font-size: 15px; padding: 14px; border-radius: 14px; }
-        .botoes { gap: 12px; margin-top: 14px; }
-        .botoes button { padding: 13px; font-size: 15px; border-radius: 14px; }
-        .balao-hq { font-size: 14px; padding: 14px 18px; max-width: 240px; }
-    }
-</style>
-</head>
 
+        /* Nome da Página / Logotipo WellGuard */
+        .brand-name {
+            font-size: 32px;
+            font-weight: 800; /* Bem negrito para destaque */
+            color: #1a73e8; /* Azul corporativo */
+            margin-bottom: 40px;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Detalhe opcional para o logotipo (um pequeno escudo) */
+        .brand-icon {
+            width: 28px;
+            height: 28px;
+            fill: #1a73e8;
+        }
+
+        /* Ícone da pasta (SVG) */
+        .icon-wrapper svg {
+            width: 72px;
+            height: 72px;
+            fill: #5f6368;
+            margin-bottom: 24px;
+        }
+
+        /* Título Principal */
+        h1 {
+            font-size: 24px;
+            font-weight: 500;
+            line-height: 1.3;
+            margin-bottom: 12px;
+            color: #202124;
+        }
+
+        /* Texto explicativo */
+        p {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #4d5156;
+            margin-bottom: 8px;
+        }
+
+        /* Código do erro (DNS_PROBE_POSSIBLE) */
+        .error-code {
+            font-size: 13px;
+            color: #4d5156;
+            margin-top: 24px;
+            margin-bottom: 24px;
+            font-weight: 400;
+            letter-spacing: 0.2px;
+        }
+
+        /* Botão Recarregar */
+        .btn-reload {
+            background-color: #5b5bf6;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background-color 0.2s, box-shadow 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-reload:hover {
+            background-color: #4a4ae0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .btn-reload:active {
+            background-color: #3e3ecb;
+        }
+
+        /* Responsividade */
+        @media (max-width: 600px) {
+            .container {
+                margin-bottom: 20vh;
+            }
+            .brand-name {
+                font-size: 28px;
+                margin-bottom: 30px;
+            }
+            h1 {
+                font-size: 20px;
+            }
+            p {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
 <body>
 
-<div class="container">
+    <div class="container">
+        
+        <!-- NOME DA PÁGINA EM DESTAQUE -->
+        <div class="brand-name">
+            <!-- Ícone de escudo (opcional, para dar cara de "Guard") -->
+            <svg class="brand-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+            </svg>
+            WellGuard
+        </div>
 
-    <div class="relogio-card">
-        <span class="icone-relogio">🕐</span>
-        <div class="hora" id="relogioHora">--:--:-- <span class="ampm">--</span></div>
-        <div class="data-relogio" id="relogioData"></div>
-        <div class="saudacao" id="saudacao">Bem-vindo!</div>
+        <!-- Ícone da Pasta com Rosto Triste -->
+        <div class="icon-wrapper">
+            <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 4H20L24 8H38C40.2 8 42 9.8 42 12V36C42 38.2 40.2 40 38 40H10C7.8 40 6 38.2 6 36V8C6 5.8 7.8 4 10 4Z" fill="#5f6368"/>
+                <path d="M6 12H42V14H6V12Z" fill="#fff" opacity="0.3"/>
+                <g transform="translate(24, 26)">
+                    <rect x="-9" y="-6" width="3" height="6" fill="white" rx="1"/>
+                    <rect x="6" y="-6" width="3" height="6" fill="white" rx="1"/>
+                    <path d="M-7 6 Q0 2 7 6" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                </g>
+            </svg>
+        </div>
+
+        <!-- Textos de Erro -->
+        <h1>Não é possível acessar esse site</h1>
+        
+        <p>Não foi possível encontrar o endereço DNS de <strong>i9filmes360.</strong>. Diagnosticando o problema.</p>
+        
+        <div class="error-code">DNS_PROBE_POSSIBLE</div>
+
+        <!-- Botão -->
+        <button class="btn-reload" onclick="window.location.reload()">Recarregar</button>
     </div>
-
-    <div class="calendario" id="calendarioCard">
-
-        <div class="cabecalho">
-            <h1>📅 Meu Calendário</h1>
-            <div class="navegacao">
-                <button onclick="mesAnterior()" aria-label="Mês anterior">‹</button>
-                <div id="mesAno"></div>
-                <button onclick="mesProximo()" aria-label="Próximo mês">›</button>
-            </div>
-        </div>
-
-        <div class="semana">
-            <div>Dom</div>
-            <div>Seg</div>
-            <div>Ter</div>
-            <div>Qua</div>
-            <div>Qui</div>
-            <div>Sex</div>
-            <div>Sáb</div>
-        </div>
-
-        <div id="dias" class="dias"></div>
-
-        <div class="area-evento">
-            <h2>
-                📝 Anotação do dia:
-                <span id="dataSelecionada">Selecione uma data</span>
-            </h2>
-
-            <textarea id="anotacao" placeholder="Digite aqui sua anotação..."></textarea>
-
-            <div class="botoes">
-                <button class="salvar" onclick="salvarEvento()">💾 Salvar</button>
-                <button class="apagar" onclick="apagarEvento()">🗑 Apagar</button>
-            </div>
-        </div>
-
-    </div>
-
-</div>
-
-<!-- Balão estilo HQ -->
-<div class="balao-hq" id="balaoHQ"></div>
-
-<script>
-
-// ===== FERIADOS NACIONAIS (Brasil) =====
-// Fixos (mesmo dia todo ano): mes (1-12), dia, nome
-const feriadosFixos = [
-    { mes: 1,  dia: 1,  nome: "Ano Novo", emoji: "🎉" },
-    { mes: 4,  dia: 21, nome: "Tiradentes", emoji: "⚔️" },
-    { mes: 5,  dia: 1,  nome: "Dia do Trabalho", emoji: "💼" },
-    { mes: 9,  dia: 7,  nome: "Independência do Brasil", emoji: "🇧🇷" },
-    { mes: 10, dia: 12, nome: "Nossa Senhora Aparecida", emoji: "🙏" },
-    { mes: 11, dia: 2,  nome: "Finados", emoji: "🕯️" },
-    { mes: 11, dia: 15, nome: "Proclamação da República", emoji: "🏛️" },
-    { mes: 11, dia: 20, nome: "Consciência Negra", emoji: "✊" },
-    { mes: 12, dia: 25, nome: "Natal", emoji: "🎄" }
-];
-
-// Feriados móveis (calculados por ano)
-function calcularFeriadosMoveis(ano) {
-    const feriados = [];
-
-    // Páscoa - algoritmo de Meeus/Jones/Butcher
-    const a = ano % 19;
-    const b = Math.floor(ano / 100);
-    const c = ano % 100;
-    const d = Math.floor(b / 4);
-    const e = b % 4;
-    const f = Math.floor((b + 8) / 25);
-    const g = Math.floor((b - f + 1) / 3);
-    const h = (19 * a + b - d - g + 15) % 30;
-    const i = Math.floor(c / 4);
-    const k = c % 4;
-    const l = (32 + 2 * e + 2 * i - h - k) % 7;
-    const m = Math.floor((a + 11 * h + 22 * l) / 451);
-    const mes = Math.floor((h + l - 7 * m + 114) / 31);
-    const dia = ((h + l - 7 * m + 114) % 31) + 1;
-
-    const pascoa = new Date(ano, mes - 1, dia);
-
-    // Carnaval (47 dias antes da Páscoa)
-    const carnaval = new Date(pascoa);
-    carnaval.setDate(pascoa.getDate() - 47);
-    feriados.push({
-        mes: carnaval.getMonth() + 1,
-        dia: carnaval.getDate(),
-        nome: "Carnaval",
-        emoji: "🎭"
-    });
-
-    // Sexta-feira Santa (2 dias antes da Páscoa)
-    const sextaSanta = new Date(pascoa);
-    sextaSanta.setDate(pascoa.getDate() - 2);
-    feriados.push({
-        mes: sextaSanta.getMonth() + 1,
-        dia: sextaSanta.getDate(),
-        nome: "Sexta-feira Santa",
-        emoji: "✝️"
-    });
-
-    // Corpus Christi (60 dias depois da Páscoa)
-    const corpusChristi = new Date(pascoa);
-    corpusChristi.setDate(pascoa.getDate() + 60);
-    feriados.push({
-        mes: corpusChristi.getMonth() + 1,
-        dia: corpusChristi.getDate(),
-        nome: "Corpus Christi",
-        emoji: "🕊️"
-    });
-
-    return feriados;
-}
-
-function buscarFeriado(ano, mes, dia) {
-    // Verifica fixos
-    const fixo = feriadosFixos.find(f => f.mes === mes && f.dia === dia);
-    if (fixo) return fixo;
-
-    // Verifica móveis
-    const moveis = calcularFeriadosMoveis(ano);
-    const movel = moveis.find(f => f.mes === mes && f.dia === dia);
-    return movel || null;
-}
-
-// ===== RELÓGIO =====
-const mesesNomes = [
-    "janeiro", "fevereiro", "março", "abril", "maio", "junho",
-    "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"
-];
-
-const diasSemana = [
-    "domingo", "segunda-feira", "terça-feira", "quarta-feira",
-    "quinta-feira", "sexta-feira", "sábado"
-];
-
-function atualizarRelogio() {
-    const agora = new Date();
-    let horas = agora.getHours();
-    const minutos = String(agora.getMinutes()).padStart(2, "0");
-    const segundos = String(agora.getSeconds()).padStart(2, "0");
-    const periodo = horas >= 12 ? "PM" : "AM";
-
-    horas = horas % 12;
-    horas = horas === 0 ? 12 : horas;
-
-    document.getElementById("relogioHora").innerHTML =
-        String(horas).padStart(2, "0") + ":" + minutos + ":" + segundos +
-        ' <span class="ampm">' + periodo + '</span>';
-
-    const diaSemana = diasSemana[agora.getDay()];
-    document.getElementById("relogioData").textContent =
-        diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1) +
-        ", " + agora.getDate() + " de " + mesesNomes[agora.getMonth()] +
-        " de " + agora.getFullYear();
-
-    const h = agora.getHours();
-    let saudacao = h >= 5 && h < 12 ? "🌅 Bom dia!" :
-                   h >= 12 && h < 18 ? "☀️ Boa tarde!" : "🌙 Boa noite!";
-    document.getElementById("saudacao").textContent = saudacao;
-}
-
-// ===== CALENDÁRIO =====
-let dataAtual = new Date();
-let dataSelecionada = null;
-
-const meses = [
-    "janeiro", "fevereiro", "março", "abril", "maio", "junho",
-    "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"
-];
-
-function mostrarCalendario() {
-    const ano = dataAtual.getFullYear();
-    const mes = dataAtual.getMonth();
-
-    document.getElementById("mesAno").textContent =
-        meses[mes] + " de " + ano;
-
-    const primeiroDia = new Date(ano, mes, 1).getDay();
-    const ultimoDia = new Date(ano, mes + 1, 0).getDate();
-    const dias = document.getElementById("dias");
-    dias.innerHTML = "";
-
-    for (let i = 0; i < primeiroDia; i++) {
-        const vazio = document.createElement("div");
-        vazio.className = "dia vazio";
-        dias.appendChild(vazio);
-    }
-
-    for (let dia = 1; dia <= ultimoDia; dia++) {
-        const elemento = document.createElement("div");
-        elemento.className = "dia";
-
-        const numero = document.createElement("div");
-        numero.className = "numero";
-        numero.textContent = dia;
-        elemento.appendChild(numero);
-
-        const diaSemana = new Date(ano, mes, dia).getDay();
-
-        // Domingo
-        if (diaSemana === 0) {
-            elemento.classList.add("domingo");
-        }
-
-        // Feriado
-        const feriado = buscarFeriado(ano, mes + 1, dia);
-        if (feriado) {
-            elemento.classList.add("feriado");
-            elemento.dataset.feriado = feriado.nome;
-            elemento.dataset.emoji = feriado.emoji;
-        }
-
-        const chave = criarChave(ano, mes + 1, dia);
-        if (localStorage.getItem(chave)) {
-            elemento.classList.add("tem-evento");
-        }
-
-        const hoje = new Date();
-        if (dia === hoje.getDate() && mes === hoje.getMonth() && ano === hoje.getFullYear()) {
-            elemento.classList.add("hoje");
-        }
-
-        if (dataSelecionada &&
-            dataSelecionada.ano === ano &&
-            dataSelecionada.mes === mes &&
-            dataSelecionada.dia === dia) {
-            elemento.classList.add("selecionado");
-        }
-
-        elemento.onclick = function(e) {
-            if (feriado) {
-                mostrarBalao(e.currentTarget, feriado);
-            }
-            selecionarDia(ano, mes, dia);
-        };
-
-        dias.appendChild(elemento);
-    }
-}
-
-// ===== BALÃO ESTILO HQ =====
-let timeoutBalao = null;
-
-function mostrarBalao(elementoDia, feriado) {
-    const balao = document.getElementById("balaoHQ");
-
-    balao.innerHTML =
-        '<span class="emoji-balao">' + feriado.emoji + '</span>' +
-        feriado.nome;
-
-    // Torna visível primeiro para medir
-    balao.style.visibility = "hidden";
-    balao.classList.add("ativo");
-
-    const rectDia = elementoDia.getBoundingClientRect();
-    const rectCal = document.getElementById("calendarioCard").getBoundingClientRect();
-    const larguraBalao = balao.offsetWidth;
-    const alturaBalao = balao.offsetHeight;
-
-    // Posição relativa ao card do calendário
-    let left = rectDia.left - rectCal.left + (rectDia.width / 2) - (larguraBalao / 2);
-    let top = rectDia.top - rectCal.top - alturaBalao - 14;
-
-    // Ajusta se sair pelas laterais
-    const maxLeft = rectCal.width - larguraBalao - 8;
-    if (left < 8) left = 8;
-    if (left > maxLeft) left = maxLeft;
-
-    // Se o balão sair por cima, posiciona abaixo
-    if (top < 8) {
-        top = rectDia.top - rectCal.top + rectDia.height + 14;
-        balao.classList.add("embaixo");
-    } else {
-        balao.classList.remove("embaixo");
-    }
-
-    balao.style.left = left + "px";
-    balao.style.top = top + "px";
-    balao.style.visibility = "visible";
-
-    // Auto-esconde após 2.5 segundos
-    if (timeoutBalao) clearTimeout(timeoutBalao);
-    timeoutBalao = setTimeout(() => {
-        balao.classList.remove("ativo");
-    }, 2500);
-}
-
-// Ajusta o rabinho quando o balão fica embaixo
-const styleExtra = document.createElement("style");
-styleExtra.textContent = `
-    .balao-hq.embaixo::after {
-        bottom: auto;
-        top: -14px;
-        border-top: none;
-        border-bottom: 14px solid #1f2937;
-    }
-    .balao-hq.embaixo::before {
-        bottom: auto;
-        top: -10px;
-        border-top: none;
-        border-bottom: 12px solid #fef3c7;
-    }
-`;
-document.head.appendChild(styleExtra);
-
-// Fecha o balão ao trocar de mês
-function fecharBalao() {
-    document.getElementById("balaoHQ").classList.remove("ativo");
-}
-
-function selecionarDia(ano, mes, dia) {
-    dataSelecionada = { ano: ano, mes: mes, dia: dia };
-
-    const dataFormatada =
-        String(dia).padStart(2, "0") + "/" +
-        String(mes + 1).padStart(2, "0") + "/" +
-        ano;
-
-    document.getElementById("dataSelecionada").textContent = dataFormatada;
-
-    const chave = criarChave(ano, mes + 1, dia);
-    document.getElementById("anotacao").value = localStorage.getItem(chave) || "";
-
-    mostrarCalendario();
-}
-
-function criarChave(ano, mes, dia) {
-    return "calendario_" + ano + "_" + mes + "_" + dia;
-}
-
-function salvarEvento() {
-    if (!dataSelecionada) {
-        alert("Selecione primeiro um dia.");
-        return;
-    }
-
-    const texto = document.getElementById("anotacao").value.trim();
-    const chave = criarChave(
-        dataSelecionada.ano,
-        dataSelecionada.mes + 1,
-        dataSelecionada.dia
-    );
-
-    if (texto === "") {
-        localStorage.removeItem(chave);
-    } else {
-        localStorage.setItem(chave, texto);
-    }
-
-    mostrarCalendario();
-    alert("Anotação salva!");
-}
-
-function apagarEvento() {
-    if (!dataSelecionada) {
-        alert("Selecione primeiro um dia.");
-        return;
-    }
-
-    const chave = criarChave(
-        dataSelecionada.ano,
-        dataSelecionada.mes + 1,
-        dataSelecionada.dia
-    );
-
-    localStorage.removeItem(chave);
-    document.getElementById("anotacao").value = "";
-    mostrarCalendario();
-}
-
-function mesAnterior() {
-    fecharBalao();
-    dataAtual.setMonth(dataAtual.getMonth() - 1);
-    mostrarCalendario();
-}
-
-function mesProximo() {
-    fecharBalao();
-    dataAtual.setMonth(dataAtual.getMonth() + 1);
-    mostrarCalendario();
-}
-
-// Fecha balão ao tocar em qualquer lugar
-document.addEventListener("click", function(e) {
-    const balao = document.getElementById("balaoHQ");
-    if (!balao.contains(e.target) && !e.target.closest(".feriado")) {
-        balao.classList.remove("ativo");
-    }
-});
-
-atualizarRelogio();
-setInterval(atualizarRelogio, 1000);
-mostrarCalendario();
-
-</script>
 
 </body>
 </html>
