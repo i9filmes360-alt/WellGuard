@@ -1,933 +1,488 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#0f172a">
-<title>Meu Calendário</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>
+<title>WellBull - Coleira Virtual</title>
+<script src='https://cdn.jsdelivr.net/npm/mqtt@5.3.4/dist/mqtt.min.js'></script>
 <style>
-    * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-        -webkit-tap-highlight-color: transparent;
-    }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0a0a0f; color: #fff;
+  min-height: 100vh; padding: 16px;
+}
+h1 { font-size: 20px; margin-bottom: 4px; }
+.subtitle { font-size: 12px; color: #8a8da3; margin-bottom: 20px; }
 
-    html, body {
-        height: 100%;
-        overflow-x: hidden;
-    }
+.card {
+  background: #1a1a26; border: 1px solid #2a2a3a;
+  border-radius: 12px; padding: 14px; margin-bottom: 12px;
+}
+.card h3 {
+  font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+  color: #8a8da3; margin-bottom: 10px; text-transform: uppercase;
+}
 
-    body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
-        background-attachment: fixed;
-        min-height: 100vh;
-        min-height: 100dvh;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        padding: 12px;
-        color: #e2e8f0;
-        -webkit-font-smoothing: antialiased;
-    }
+label { display: block; font-size: 12px; color: #8a8da3; margin-bottom: 4px; }
+input[type=text], input[type=number] {
+  width: 100%; background: #0f0f17; border: 1px solid #2a2a3a;
+  color: #fff; border-radius: 8px; padding: 10px 12px;
+  font-size: 14px; outline: none; margin-bottom: 10px;
+}
+input:focus { border-color: #7c3aed; }
 
-    .container {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        width: 100%;
-        max-width: 480px;
-        margin: 0 auto;
-    }
+.btn {
+  width: 100%; padding: 14px; border: none; border-radius: 10px;
+  font-size: 15px; font-weight: 700; cursor: pointer;
+  transition: all 0.2s; color: #fff;
+}
+.btn:active { transform: scale(0.98); }
+.btn-start { background: #16a34a; }
+.btn-stop { background: #dc2626; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* ===== RELÓGIO ===== */
-    .relogio-card {
-        background: rgba(255, 255, 255, 0.06);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 22px;
-        padding: 20px;
-        text-align: center;
-        box-shadow: 0 15px 35px -12px rgba(0, 0, 0, 0.5);
-        animation: fadeInUp 0.6s ease-out;
-    }
+.status-row {
+  display: flex; justify-content: space-between;
+  padding: 6px 0; font-size: 13px;
+}
+.status-row .lbl { color: #8a8da3; }
+.status-row .val { color: #fff; font-weight: 600; text-align: right; }
 
-    .relogio-card .icone-relogio {
-        font-size: 24px;
-        margin-bottom: 4px;
-        display: block;
-    }
+.badge {
+  display: inline-block; padding: 3px 8px; border-radius: 10px;
+  font-size: 11px; font-weight: 700;
+}
+.badge-ok { background: #16a34a; }
+.badge-wait { background: #f59e0b; color: #000; }
+.badge-off { background: #6b7280; }
 
-    .relogio-card .hora {
-        font-size: 42px;
-        font-weight: 700;
-        color: #f8fafc;
-        letter-spacing: 1px;
-        line-height: 1.1;
-        font-variant-numeric: tabular-nums;
-        text-shadow: 0 0 30px rgba(96, 165, 250, 0.3);
-    }
+.log {
+  background: #0f0f17; border-radius: 8px; padding: 8px 10px;
+  font-size: 11px; color: #8a8da3; max-height: 120px;
+  overflow-y: auto; font-family: monospace;
+}
+.log .ok { color: #10b981; }
+.log .err { color: #ef4444; }
+.log .info { color: #60a5fa; }
 
-    .relogio-card .hora .ampm {
-        font-size: 16px;
-        font-weight: 600;
-        color: #60a5fa;
-        margin-left: 4px;
-        vertical-align: middle;
-    }
+.toggle-row {
+  display: flex; justify-content: space-between; align-items: center;
+  background: #0f0f17; padding: 10px 12px; border-radius: 10px;
+  margin-bottom: 10px; font-size: 13px; font-weight: 600;
+}
+.switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute; cursor: pointer; inset: 0;
+  background: #374151; border-radius: 24px; transition: 0.3s;
+}
+.slider::before {
+  content: ''; position: absolute; height: 18px; width: 18px;
+  left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.3s;
+}
+.switch input:checked + .slider { background: #10b981; }
+.switch input:checked + .slider::before { transform: translateX(20px); }
 
-    .relogio-card .data-relogio {
-        margin-top: 8px;
-        font-size: 13px;
-        color: #94a3b8;
-        font-weight: 500;
-    }
-
-    .relogio-card .saudacao {
-        margin-top: 12px;
-        font-size: 12px;
-        color: #60a5fa;
-        font-weight: 600;
-        background: rgba(96, 165, 250, 0.1);
-        display: inline-block;
-        padding: 5px 14px;
-        border-radius: 100px;
-        border: 1px solid rgba(96, 165, 250, 0.15);
-    }
-
-    /* ===== CALENDÁRIO ===== */
-    .calendario {
-        background: rgba(255, 255, 255, 0.06);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 22px;
-        overflow: hidden;
-        box-shadow: 0 15px 35px -12px rgba(0, 0, 0, 0.5);
-        animation: fadeInUp 0.6s ease-out 0.1s both;
-        position: relative;
-    }
-
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .cabecalho {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
-        padding: 16px 18px;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .cabecalho::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle at 30% 40%, rgba(255,255,255,0.12) 0%, transparent 60%);
-        pointer-events: none;
-    }
-
-    .cabecalho h1 {
-        font-size: 17px;
-        font-weight: 700;
-        color: white;
-        margin-bottom: 12px;
-        letter-spacing: -0.3px;
-        position: relative;
-    }
-
-    .navegacao {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: relative;
-    }
-
-    .navegacao button {
-        width: 42px;
-        height: 42px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.12);
-        color: white;
-        font-size: 20px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        backdrop-filter: blur(4px);
-        flex-shrink: 0;
-    }
-
-    .navegacao button:active {
-        transform: scale(0.92);
-        background: rgba(255, 255, 255, 0.3);
-    }
-
-    #mesAno {
-        font-size: 16px;
-        font-weight: 600;
-        color: white;
-        text-transform: capitalize;
-        letter-spacing: 0.2px;
-    }
-
-    .semana {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        background: rgba(255, 255, 255, 0.04);
-        padding: 10px 8px 4px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    }
-
-    .semana div {
-        text-align: center;
-        font-weight: 600;
-        color: #94a3b8;
-        padding: 4px 0;
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-    }
-
-    .semana div:first-child {
-        color: #fb923c;
-    }
-
-    .dias {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 3px;
-        padding: 8px;
-    }
-
-    .dia {
-        aspect-ratio: 1 / 1;
-        min-height: auto;
-        border: 1px solid rgba(255, 255, 255, 0.07);
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.04);
-        cursor: pointer;
-        padding: 0;
-        position: relative;
-        transition: all 0.15s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .dia:active:not(.vazio) {
-        transform: scale(0.92);
-        background: rgba(96, 165, 250, 0.25);
-        border-color: rgba(96, 165, 250, 0.6);
-    }
-
-    .dia.vazio {
-        background: transparent;
-        cursor: default;
-        border: 1px solid transparent;
-    }
-
-    .numero {
-        font-size: 14px;
-        font-weight: 600;
-        color: #cbd5e1;
-    }
-
-    /* Domingo - número laranja */
-    .domingo .numero {
-        color: #fb923c;
-    }
-
-    /* Feriado - número e fundo vermelho */
-    .feriado {
-        background: rgba(239, 68, 68, 0.18) !important;
-        border-color: rgba(239, 68, 68, 0.5) !important;
-    }
-
-    .feriado .numero {
-        color: #fca5a5 !important;
-    }
-
-    .feriado:active:not(.vazio) {
-        background: rgba(239, 68, 68, 0.35) !important;
-        transform: scale(0.92);
-    }
-
-    /* Feriado que também é hoje */
-    .feriado.hoje {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
-        border-color: #ef4444 !important;
-    }
-
-    .feriado.hoje .numero {
-        color: white !important;
-    }
-
-    .hoje {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
-        border-color: #3b82f6 !important;
-        box-shadow: 0 3px 15px -3px rgba(59, 130, 246, 0.6);
-    }
-
-    .hoje .numero {
-        color: white;
-    }
-
-    /* Domingo que também é hoje */
-    .hoje.domingo .numero {
-        color: white;
-    }
-
-    .selecionado {
-        box-shadow: inset 0 0 0 2px #fbbf24, 0 0 15px -3px rgba(251, 191, 36, 0.4) !important;
-        border-color: #fbbf24 !important;
-    }
-
-    .tem-evento::after {
-        content: "";
-        position: absolute;
-        bottom: 4px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 4px;
-        height: 4px;
-        background: #f87171;
-        border-radius: 50%;
-        box-shadow: 0 0 6px rgba(248, 113, 113, 0.8);
-    }
-
-    .feriado.tem-evento::after {
-        background: #fbbf24;
-        box-shadow: 0 0 6px rgba(251, 191, 36, 0.8);
-    }
-
-    /* ===== BALÃO ESTILO HQ ===== */
-    .balao-hq {
-        position: absolute;
-        background: #fef3c7;
-        color: #1f2937;
-        border: 2.5px solid #1f2937;
-        border-radius: 18px;
-        padding: 12px 16px;
-        font-size: 13px;
-        font-weight: 700;
-        font-family: 'Inter', sans-serif;
-        text-align: center;
-        z-index: 100;
-        box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
-        max-width: 200px;
-        line-height: 1.3;
-        opacity: 0;
-        transform: scale(0.5) translateY(10px);
-        pointer-events: none;
-        transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-        letter-spacing: 0.2px;
-    }
-
-    .balao-hq.ativo {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
-
-    /* Rabinho do balão (apontando pra baixo) */
-    .balao-hq::after {
-        content: '';
-        position: absolute;
-        bottom: -14px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 0;
-        height: 0;
-        border-left: 10px solid transparent;
-        border-right: 10px solid transparent;
-        border-top: 14px solid #1f2937;
-    }
-
-    .balao-hq::before {
-        content: '';
-        position: absolute;
-        bottom: -10px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 0;
-        height: 0;
-        border-left: 8px solid transparent;
-        border-right: 8px solid transparent;
-        border-top: 12px solid #fef3c7;
-        z-index: 1;
-    }
-
-    .balao-hq .emoji-balao {
-        display: block;
-        font-size: 18px;
-        margin-bottom: 3px;
-    }
-
-    /* ===== ÁREA DE EVENTOS ===== */
-    .area-evento {
-        padding: 14px 16px 16px;
-        border-top: 1px solid rgba(255, 255, 255, 0.06);
-        background: rgba(15, 23, 42, 0.4);
-    }
-
-    .area-evento h2 {
-        font-size: 13px;
-        font-weight: 600;
-        margin-bottom: 10px;
-        color: #94a3b8;
-    }
-
-    #dataSelecionada {
-        color: #60a5fa;
-        font-weight: 700;
-    }
-
-    textarea {
-        width: 100%;
-        height: 70px;
-        resize: none;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        padding: 12px;
-        font-family: 'Inter', sans-serif;
-        font-size: 14px;
-        outline: none;
-        background: rgba(255, 255, 255, 0.05);
-        color: #e2e8f0;
-        transition: all 0.2s ease;
-        line-height: 1.5;
-    }
-
-    textarea::placeholder { color: #64748b; }
-
-    textarea:focus {
-        border-color: #3b82f6;
-        background: rgba(59, 130, 246, 0.08);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-    }
-
-    .botoes {
-        display: flex;
-        gap: 8px;
-        margin-top: 10px;
-    }
-
-    .botoes button {
-        flex: 1;
-        padding: 13px 8px;
-        border: none;
-        border-radius: 12px;
-        cursor: pointer;
-        font-size: 13px;
-        font-weight: 600;
-        transition: all 0.2s ease;
-        font-family: 'Inter', sans-serif;
-    }
-
-    .botoes button:active { transform: scale(0.96); }
-
-    .salvar {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        color: white;
-        box-shadow: 0 4px 12px -4px rgba(59, 130, 246, 0.5);
-    }
-
-    .apagar {
-        background: rgba(239, 68, 68, 0.15);
-        color: #f87171;
-        border: 1px solid rgba(239, 68, 68, 0.3);
-    }
-
-    /* ===== TELAS PEQUENAS ===== */
-    @media (max-width: 360px) {
-        body { padding: 8px; }
-        .container { gap: 8px; }
-        .relogio-card { padding: 16px; border-radius: 18px; }
-        .relogio-card .hora { font-size: 34px; }
-        .relogio-card .hora .ampm { font-size: 14px; }
-        .relogio-card .data-relogio { font-size: 12px; }
-        .calendario { border-radius: 18px; }
-        .cabecalho { padding: 12px 14px; }
-        .cabecalho h1 { font-size: 15px; margin-bottom: 10px; }
-        #mesAno { font-size: 14px; }
-        .navegacao button { width: 38px; height: 38px; font-size: 18px; border-radius: 10px; }
-        .dias { gap: 2px; padding: 6px; }
-        .dia { border-radius: 8px; }
-        .numero { font-size: 12px; }
-        .semana div { font-size: 9px; }
-        .area-evento { padding: 12px; }
-        .area-evento h2 { font-size: 12px; }
-        textarea { font-size: 13px; height: 60px; }
-        .botoes button { padding: 11px 6px; font-size: 12px; }
-        .balao-hq { font-size: 11px; padding: 10px 12px; max-width: 160px; }
-    }
-
-    /* ===== TELAS GRANDES ===== */
-    @media (min-width: 768px) {
-        body { align-items: center; padding: 24px; }
-        .container {
-            flex-direction: row;
-            max-width: 1050px;
-            gap: 24px;
-            align-items: flex-start;
-        }
-        .relogio-card {
-            width: 300px;
-            min-width: 300px;
-            padding: 35px 30px;
-            border-radius: 28px;
-        }
-        .relogio-card .icone-relogio { font-size: 32px; margin-bottom: 10px; }
-        .relogio-card .hora { font-size: 56px; letter-spacing: 2px; }
-        .relogio-card .hora .ampm { font-size: 22px; margin-left: 6px; }
-        .relogio-card .data-relogio { font-size: 15px; margin-top: 12px; }
-        .relogio-card .saudacao { font-size: 14px; margin-top: 18px; padding: 6px 18px; }
-        .calendario { flex: 1; border-radius: 28px; }
-        .cabecalho { padding: 22px 24px; }
-        .cabecalho h1 { font-size: 24px; margin-bottom: 16px; }
-        #mesAno { font-size: 20px; }
-        .navegacao button { width: 46px; height: 46px; font-size: 22px; border-radius: 14px; }
-        .semana { padding: 12px 14px 6px; }
-        .semana div { font-size: 12px; letter-spacing: 0.8px; padding: 8px 0; }
-        .dias { gap: 6px; padding: 14px; }
-        .dia {
-            aspect-ratio: auto;
-            min-height: 72px;
-            border-radius: 14px;
-            padding: 9px;
-            justify-content: flex-start;
-            align-items: flex-start;
-        }
-        .numero { font-size: 16px; }
-        .tem-evento::after { width: 6px; height: 6px; bottom: 9px; }
-        .area-evento { padding: 20px 24px 24px; }
-        .area-evento h2 { font-size: 16px; margin-bottom: 12px; }
-        textarea { height: 80px; font-size: 15px; padding: 14px; border-radius: 14px; }
-        .botoes { gap: 12px; margin-top: 14px; }
-        .botoes button { padding: 13px; font-size: 15px; border-radius: 14px; }
-        .balao-hq { font-size: 14px; padding: 14px 18px; max-width: 240px; }
-    }
+.footer {
+  text-align: center; font-size: 11px; color: #6b7280;
+  margin-top: 20px; padding-top: 12px; border-top: 1px solid #2a2a3a;
+}
 </style>
 </head>
-
 <body>
 
-<div class="container">
+<h1>📱 Coleira Virtual</h1>
+<div class='subtitle'>WellBull - Simulador de coleira via celular</div>
 
-    <div class="relogio-card">
-        <span class="icone-relogio">🕐</span>
-        <div class="hora" id="relogioHora">--:--:-- <span class="ampm">--</span></div>
-        <div class="data-relogio" id="relogioData"></div>
-        <div class="saudacao" id="saudacao">Bem-vindo!</div>
-    </div>
-
-    <div class="calendario" id="calendarioCard">
-
-        <div class="cabecalho">
-            <h1>📅 Meu Calendário</h1>
-            <div class="navegacao">
-                <button onclick="mesAnterior()" aria-label="Mês anterior">‹</button>
-                <div id="mesAno"></div>
-                <button onclick="mesProximo()" aria-label="Próximo mês">›</button>
-            </div>
-        </div>
-
-        <div class="semana">
-            <div>Dom</div>
-            <div>Seg</div>
-            <div>Ter</div>
-            <div>Qua</div>
-            <div>Qui</div>
-            <div>Sex</div>
-            <div>Sáb</div>
-        </div>
-
-        <div id="dias" class="dias"></div>
-
-        <div class="area-evento">
-            <h2>
-                📝 Anotação do dia:
-                <span id="dataSelecionada">Selecione uma data</span>
-            </h2>
-
-            <textarea id="anotacao" placeholder="Digite aqui sua anotação..."></textarea>
-
-            <div class="botoes">
-                <button class="salvar" onclick="salvarEvento()">💾 Salvar</button>
-                <button class="apagar" onclick="apagarEvento()">🗑 Apagar</button>
-            </div>
-        </div>
-
-    </div>
-
+<div class='card'>
+  <h3>️ Configuração</h3>
+  <label>ID da coleira (sem espaços ou acentos)</label>
+  <input type='text' id='cow-id' placeholder='ex: celular01' maxlength='24'>
+  
+  <label>Nome de exibição (opcional)</label>
+  <input type='text' id='cow-name' placeholder='ex: Teste Celular' maxlength='24'>
+  
+  <label>Intervalo de envio (segundos)</label>
+  <input type='number' id='interval' value='5' min='2' max='60'>
 </div>
 
-<!-- Balão estilo HQ -->
-<div class="balao-hq" id="balaoHQ"></div>
+<div class='card'>
+  <h3>🎮 Controle</h3>
+  <div class='toggle-row'>
+    <span> Manter tela ligada</span>
+    <label class='switch'><input type='checkbox' id='wake-lock' checked><span class='slider'></span></label>
+  </div>
+  <button id='btn-toggle' class='btn btn-start'>▶️ INICIAR</button>
+</div>
+
+<div class='card'>
+  <h3>📊 Status</h3>
+  <div class='status-row'><span class='lbl'>MQTT:</span><span id='st-mqtt' class='badge badge-off'>desconectado</span></div>
+  <div class='status-row'><span class='lbl'>GPS:</span><span id='st-gps' class='badge badge-off'>aguardando</span></div>
+  <div class='status-row'><span class='lbl'>Bateria:</span><span id='st-bat' class='val'>--</span></div>
+  <div class='status-row'><span class='lbl'>Lat:</span><span id='st-lat' class='val'>--</span></div>
+  <div class='status-row'><span class='lbl'>Lon:</span><span id='st-lon' class='val'>--</span></div>
+  <div class='status-row'><span class='lbl'>Velocidade:</span><span id='st-spd' class='val'>0 km/h</span></div>
+  <div class='status-row'><span class='lbl'>Altitude:</span><span id='st-alt' class='val'>0 m</span></div>
+  <div class='status-row'><span class='lbl'>Precisão:</span><span id='st-acc' class='val'>--</span></div>
+  <div class='status-row'><span class='lbl'>Enviados:</span><span id='st-sent' class='val'>0</span></div>
+  <div class='status-row'><span class='lbl'>Ligado há:</span><span id='st-up' class='val'>0 s</span></div>
+</div>
+
+<div class='card'>
+  <h3>📝 Log</h3>
+  <div id='log' class='log'></div>
+</div>
+
+<div class='footer'>
+  Mantenha esta aba aberta para continuar enviando dados.<br>
+  Funciona melhor no Chrome Android com tela ligada.
+</div>
 
 <script>
+// ===== CONFIG (MESMO do index.html) =====
+var BROKER_URL   = 'wss://broker.emqx.io:8084/mqtt';
+var TOPIC_PREFIX = 'wellbullbpa6tfor';
 
-// ===== FERIADOS NACIONAIS (Brasil) =====
-// Fixos (mesmo dia todo ano): mes (1-12), dia, nome
-const feriadosFixos = [
-    { mes: 1,  dia: 1,  nome: "Ano Novo", emoji: "🎉" },
-    { mes: 4,  dia: 21, nome: "Tiradentes", emoji: "⚔️" },
-    { mes: 5,  dia: 1,  nome: "Dia do Trabalho", emoji: "💼" },
-    { mes: 9,  dia: 7,  nome: "Independência do Brasil", emoji: "🇧🇷" },
-    { mes: 10, dia: 12, nome: "Nossa Senhora Aparecida", emoji: "🙏" },
-    { mes: 11, dia: 2,  nome: "Finados", emoji: "🕯️" },
-    { mes: 11, dia: 15, nome: "Proclamação da República", emoji: "🏛️" },
-    { mes: 11, dia: 20, nome: "Consciência Negra", emoji: "✊" },
-    { mes: 12, dia: 25, nome: "Natal", emoji: "🎄" }
-];
+// ===== ESTADO =====
+var running = false;
+var client = null;
+var watchId = null;
+var sendTimer = null;
+var startTime = 0;
+var sentCount = 0;
+var lastPos = null;
+var lastTime = 0;
+var currentSpeed = 0;
+var batteryLevel = null;
+var batteryCharging = false;
+var gpsFix = false;
+var currentLat = 0, currentLon = 0, currentAlt = 0, currentAcc = 0;
+var wakeLock = null;
 
-// Feriados móveis (calculados por ano)
-function calcularFeriadosMoveis(ano) {
-    const feriados = [];
-
-    // Páscoa - algoritmo de Meeus/Jones/Butcher
-    const a = ano % 19;
-    const b = Math.floor(ano / 100);
-    const c = ano % 100;
-    const d = Math.floor(b / 4);
-    const e = b % 4;
-    const f = Math.floor((b + 8) / 25);
-    const g = Math.floor((b - f + 1) / 3);
-    const h = (19 * a + b - d - g + 15) % 30;
-    const i = Math.floor(c / 4);
-    const k = c % 4;
-    const l = (32 + 2 * e + 2 * i - h - k) % 7;
-    const m = Math.floor((a + 11 * h + 22 * l) / 451);
-    const mes = Math.floor((h + l - 7 * m + 114) / 31);
-    const dia = ((h + l - 7 * m + 114) % 31) + 1;
-
-    const pascoa = new Date(ano, mes - 1, dia);
-
-    // Carnaval (47 dias antes da Páscoa)
-    const carnaval = new Date(pascoa);
-    carnaval.setDate(pascoa.getDate() - 47);
-    feriados.push({
-        mes: carnaval.getMonth() + 1,
-        dia: carnaval.getDate(),
-        nome: "Carnaval",
-        emoji: "🎭"
-    });
-
-    // Sexta-feira Santa (2 dias antes da Páscoa)
-    const sextaSanta = new Date(pascoa);
-    sextaSanta.setDate(pascoa.getDate() - 2);
-    feriados.push({
-        mes: sextaSanta.getMonth() + 1,
-        dia: sextaSanta.getDate(),
-        nome: "Sexta-feira Santa",
-        emoji: "✝️"
-    });
-
-    // Corpus Christi (60 dias depois da Páscoa)
-    const corpusChristi = new Date(pascoa);
-    corpusChristi.setDate(pascoa.getDate() + 60);
-    feriados.push({
-        mes: corpusChristi.getMonth() + 1,
-        dia: corpusChristi.getDate(),
-        nome: "Corpus Christi",
-        emoji: "🕊️"
-    });
-
-    return feriados;
+// ===== UTILS =====
+function $(id) { return document.getElementById(id); }
+function log(msg, type) {
+  var el = $('log');
+  var time = new Date().toLocaleTimeString();
+  el.innerHTML = '<div class="' + (type || '') + '">[' + time + '] ' + msg + '</div>' + el.innerHTML;
+  // mantém só últimas 50 linhas
+  var lines = el.children;
+  while (lines.length > 50) el.removeChild(lines[lines.length - 1]);
 }
-
-function buscarFeriado(ano, mes, dia) {
-    // Verifica fixos
-    const fixo = feriadosFixos.find(f => f.mes === mes && f.dia === dia);
-    if (fixo) return fixo;
-
-    // Verifica móveis
-    const moveis = calcularFeriadosMoveis(ano);
-    const movel = moveis.find(f => f.mes === mes && f.dia === dia);
-    return movel || null;
+function fmtUptime(s) {
+  var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+  if (h > 0) return h + 'h ' + m + 'min';
+  if (m > 0) return m + 'min ' + sec + 's';
+  return sec + ' s';
 }
+function limparId(v) { return (v || '').trim().replace(/[^A-Za-z0-9_-]/g, ''); }
+function limparNome(v) { return (v || '').replace(/[|"\\\u0000-\u001f]/g, '').trim().slice(0, 24); }
 
-// ===== RELÓGIO =====
-const mesesNomes = [
-    "janeiro", "fevereiro", "março", "abril", "maio", "junho",
-    "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"
-];
-
-const diasSemana = [
-    "domingo", "segunda-feira", "terça-feira", "quarta-feira",
-    "quinta-feira", "sexta-feira", "sábado"
-];
-
-function atualizarRelogio() {
-    const agora = new Date();
-    let horas = agora.getHours();
-    const minutos = String(agora.getMinutes()).padStart(2, "0");
-    const segundos = String(agora.getSeconds()).padStart(2, "0");
-    const periodo = horas >= 12 ? "PM" : "AM";
-
-    horas = horas % 12;
-    horas = horas === 0 ? 12 : horas;
-
-    document.getElementById("relogioHora").innerHTML =
-        String(horas).padStart(2, "0") + ":" + minutos + ":" + segundos +
-        ' <span class="ampm">' + periodo + '</span>';
-
-    const diaSemana = diasSemana[agora.getDay()];
-    document.getElementById("relogioData").textContent =
-        diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1) +
-        ", " + agora.getDate() + " de " + mesesNomes[agora.getMonth()] +
-        " de " + agora.getFullYear();
-
-    const h = agora.getHours();
-    let saudacao = h >= 5 && h < 12 ? "🌅 Bom dia!" :
-                   h >= 12 && h < 18 ? "☀️ Boa tarde!" : "🌙 Boa noite!";
-    document.getElementById("saudacao").textContent = saudacao;
-}
-
-// ===== CALENDÁRIO =====
-let dataAtual = new Date();
-let dataSelecionada = null;
-
-const meses = [
-    "janeiro", "fevereiro", "março", "abril", "maio", "junho",
-    "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"
-];
-
-function mostrarCalendario() {
-    const ano = dataAtual.getFullYear();
-    const mes = dataAtual.getMonth();
-
-    document.getElementById("mesAno").textContent =
-        meses[mes] + " de " + ano;
-
-    const primeiroDia = new Date(ano, mes, 1).getDay();
-    const ultimoDia = new Date(ano, mes + 1, 0).getDate();
-    const dias = document.getElementById("dias");
-    dias.innerHTML = "";
-
-    for (let i = 0; i < primeiroDia; i++) {
-        const vazio = document.createElement("div");
-        vazio.className = "dia vazio";
-        dias.appendChild(vazio);
-    }
-
-    for (let dia = 1; dia <= ultimoDia; dia++) {
-        const elemento = document.createElement("div");
-        elemento.className = "dia";
-
-        const numero = document.createElement("div");
-        numero.className = "numero";
-        numero.textContent = dia;
-        elemento.appendChild(numero);
-
-        const diaSemana = new Date(ano, mes, dia).getDay();
-
-        // Domingo
-        if (diaSemana === 0) {
-            elemento.classList.add("domingo");
-        }
-
-        // Feriado
-        const feriado = buscarFeriado(ano, mes + 1, dia);
-        if (feriado) {
-            elemento.classList.add("feriado");
-            elemento.dataset.feriado = feriado.nome;
-            elemento.dataset.emoji = feriado.emoji;
-        }
-
-        const chave = criarChave(ano, mes + 1, dia);
-        if (localStorage.getItem(chave)) {
-            elemento.classList.add("tem-evento");
-        }
-
-        const hoje = new Date();
-        if (dia === hoje.getDate() && mes === hoje.getMonth() && ano === hoje.getFullYear()) {
-            elemento.classList.add("hoje");
-        }
-
-        if (dataSelecionada &&
-            dataSelecionada.ano === ano &&
-            dataSelecionada.mes === mes &&
-            dataSelecionada.dia === dia) {
-            elemento.classList.add("selecionado");
-        }
-
-        elemento.onclick = function(e) {
-            if (feriado) {
-                mostrarBalao(e.currentTarget, feriado);
-            }
-            selecionarDia(ano, mes, dia);
-        };
-
-        dias.appendChild(elemento);
-    }
-}
-
-// ===== BALÃO ESTILO HQ =====
-let timeoutBalao = null;
-
-function mostrarBalao(elementoDia, feriado) {
-    const balao = document.getElementById("balaoHQ");
-
-    balao.innerHTML =
-        '<span class="emoji-balao">' + feriado.emoji + '</span>' +
-        feriado.nome;
-
-    // Torna visível primeiro para medir
-    balao.style.visibility = "hidden";
-    balao.classList.add("ativo");
-
-    const rectDia = elementoDia.getBoundingClientRect();
-    const rectCal = document.getElementById("calendarioCard").getBoundingClientRect();
-    const larguraBalao = balao.offsetWidth;
-    const alturaBalao = balao.offsetHeight;
-
-    // Posição relativa ao card do calendário
-    let left = rectDia.left - rectCal.left + (rectDia.width / 2) - (larguraBalao / 2);
-    let top = rectDia.top - rectCal.top - alturaBalao - 14;
-
-    // Ajusta se sair pelas laterais
-    const maxLeft = rectCal.width - larguraBalao - 8;
-    if (left < 8) left = 8;
-    if (left > maxLeft) left = maxLeft;
-
-    // Se o balão sair por cima, posiciona abaixo
-    if (top < 8) {
-        top = rectDia.top - rectCal.top + rectDia.height + 14;
-        balao.classList.add("embaixo");
+// ===== BATERIA =====
+async function initBattery() {
+  try {
+    if ('getBattery' in navigator) {
+      var bat = await navigator.getBattery();
+      batteryLevel = Math.round(bat.level * 100);
+      batteryCharging = bat.charging;
+      bat.addEventListener('levelchange', function () {
+        batteryLevel = Math.round(bat.level * 100);
+        batteryCharging = bat.charging;
+        updateBatteryUI();
+      });
+      bat.addEventListener('chargingchange', function () {
+        batteryCharging = bat.charging;
+        updateBatteryUI();
+      });
+      updateBatteryUI();
     } else {
-        balao.classList.remove("embaixo");
+      $('st-bat').innerText = 'API não disponível';
     }
-
-    balao.style.left = left + "px";
-    balao.style.top = top + "px";
-    balao.style.visibility = "visible";
-
-    // Auto-esconde após 2.5 segundos
-    if (timeoutBalao) clearTimeout(timeoutBalao);
-    timeoutBalao = setTimeout(() => {
-        balao.classList.remove("ativo");
-    }, 2500);
+  } catch (e) {
+    log('Erro bateria: ' + e.message, 'err');
+  }
+}
+function updateBatteryUI() {
+  var txt = batteryLevel + '%';
+  if (batteryCharging) txt += ' ⚡';
+  $('st-bat').innerText = txt;
 }
 
-// Ajusta o rabinho quando o balão fica embaixo
-const styleExtra = document.createElement("style");
-styleExtra.textContent = `
-    .balao-hq.embaixo::after {
-        bottom: auto;
-        top: -14px;
-        border-top: none;
-        border-bottom: 14px solid #1f2937;
+// ===== GPS =====
+function startGPS() {
+  if (!navigator.geolocation) {
+    log('Geolocalização não suportada', 'err');
+    $('st-gps').innerText = 'não suportado';
+    $('st-gps').className = 'badge badge-off';
+    return;
+  }
+  
+  $('st-gps').innerText = 'buscando...';
+  $('st-gps').className = 'badge badge-wait';
+  
+  watchId = navigator.geolocation.watchPosition(
+    function (pos) {
+      gpsFix = true;
+      currentLat = pos.coords.latitude;
+      currentLon = pos.coords.longitude;
+      currentAlt = pos.coords.altitude || 0;
+      currentAcc = pos.coords.accuracy || 0;
+      
+      // calcula velocidade
+      var now = Date.now();
+      if (lastPos && lastTime) {
+        var dt = (now - lastTime) / 1000;
+        if (dt > 0) {
+          var dist = haversine(lastPos.lat, lastPos.lon, currentLat, currentLon);
+          currentSpeed = (dist / dt) * 3.6; // km/h
+          // suaviza
+          currentSpeed = Math.min(currentSpeed, 150);
+        }
+      }
+      lastPos = { lat: currentLat, lon: currentLon };
+      lastTime = now;
+      
+      $('st-gps').innerText = 'OK (' + Math.round(currentAcc) + 'm)';
+      $('st-gps').className = 'badge badge-ok';
+      $('st-lat').innerText = currentLat.toFixed(6);
+      $('st-lon').innerText = currentLon.toFixed(6);
+      $('st-alt').innerText = Math.round(currentAlt) + ' m';
+      $('st-acc').innerText = Math.round(currentAcc) + ' m';
+      $('st-spd').innerText = currentSpeed.toFixed(1) + ' km/h';
+    },
+    function (err) {
+      gpsFix = false;
+      $('st-gps').innerText = 'erro: ' + err.message;
+      $('st-gps').className = 'badge badge-off';
+      log('GPS erro: ' + err.message, 'err');
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 0
     }
-    .balao-hq.embaixo::before {
-        bottom: auto;
-        top: -10px;
-        border-top: none;
-        border-bottom: 12px solid #fef3c7;
+  );
+}
+function stopGPS() {
+  if (watchId !== null) {
+    navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+  }
+  gpsFix = false;
+  $('st-gps').innerText = 'parado';
+  $('st-gps').className = 'badge badge-off';
+}
+
+function haversine(lat1, lon1, lat2, lon2) {
+  var R = 6371000;
+  var dLat = (lat2 - lat1) * Math.PI / 180;
+  var dLon = (lon2 - lon1) * Math.PI / 180;
+  var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+          Math.sin(dLon/2) * Math.sin(dLon/2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
+// ===== WAKE LOCK =====
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      log('Wake Lock ativado', 'info');
+      wakeLock.addEventListener('release', function () {
+        log('Wake Lock liberado', 'info');
+      });
     }
-`;
-document.head.appendChild(styleExtra);
-
-// Fecha o balão ao trocar de mês
-function fecharBalao() {
-    document.getElementById("balaoHQ").classList.remove("ativo");
+  } catch (e) {
+    log('Wake Lock falhou: ' + e.message, 'err');
+  }
+}
+function releaseWakeLock() {
+  if (wakeLock) {
+    wakeLock.release();
+    wakeLock = null;
+  }
 }
 
-function selecionarDia(ano, mes, dia) {
-    dataSelecionada = { ano: ano, mes: mes, dia: dia };
-
-    const dataFormatada =
-        String(dia).padStart(2, "0") + "/" +
-        String(mes + 1).padStart(2, "0") + "/" +
-        ano;
-
-    document.getElementById("dataSelecionada").textContent = dataFormatada;
-
-    const chave = criarChave(ano, mes + 1, dia);
-    document.getElementById("anotacao").value = localStorage.getItem(chave) || "";
-
-    mostrarCalendario();
+// ===== MQTT =====
+function connectMQTT() {
+  var cowId = limparId($('cow-id').value);
+  if (!cowId) {
+    log('Informe um ID válido', 'err');
+    return false;
+  }
+  
+  var opts = {
+    clientId: 'wellbull_virtual_' + Math.random().toString(16).slice(2, 10),
+    clean: true,
+    reconnectPeriod: 3000,
+    connectTimeout: 10000
+  };
+  
+  client = mqtt.connect(BROKER_URL, opts);
+  
+  client.on('connect', function () {
+    $('st-mqtt').innerText = 'conectado';
+    $('st-mqtt').className = 'badge badge-ok';
+    log('MQTT conectado', 'ok');
+    
+    // publica status online (retained)
+    client.publish(TOPIC_PREFIX + '/' + cowId + '/status', 'online', { qos: 1, retain: true });
+    log('Status online publicado', 'info');
+  });
+  
+  client.on('reconnect', function () {
+    $('st-mqtt').innerText = 'reconectando...';
+    $('st-mqtt').className = 'badge badge-wait';
+  });
+  
+  client.on('close', function () {
+    $('st-mqtt').innerText = 'desconectado';
+    $('st-mqtt').className = 'badge badge-off';
+  });
+  
+  client.on('error', function (e) {
+    log('MQTT erro: ' + e.message, 'err');
+  });
+  
+  client.on('message', function (topic, payload) {
+    log('📩 ' + topic + ': ' + payload.toString(), 'info');
+    // Se receber comando, vibra o celular
+    if (navigator.vibrate) navigator.vibrate(200);
+  });
+  
+  // subscreve comandos (para receber testes)
+  client.subscribe(TOPIC_PREFIX + '/' + cowId + '/cmd');
+  
+  return true;
 }
-
-function criarChave(ano, mes, dia) {
-    return "calendario_" + ano + "_" + mes + "_" + dia;
-}
-
-function salvarEvento() {
-    if (!dataSelecionada) {
-        alert("Selecione primeiro um dia.");
-        return;
+function disconnectMQTT() {
+  if (client) {
+    var cowId = limparId($('cow-id').value);
+    if (cowId && client.connected) {
+      client.publish(TOPIC_PREFIX + '/' + cowId + '/status', 'offline', { qos: 1, retain: true });
     }
-
-    const texto = document.getElementById("anotacao").value.trim();
-    const chave = criarChave(
-        dataSelecionada.ano,
-        dataSelecionada.mes + 1,
-        dataSelecionada.dia
-    );
-
-    if (texto === "") {
-        localStorage.removeItem(chave);
-    } else {
-        localStorage.setItem(chave, texto);
-    }
-
-    mostrarCalendario();
-    alert("Anotação salva!");
+    client.end();
+    client = null;
+  }
+  $('st-mqtt').innerText = 'desconectado';
+  $('st-mqtt').className = 'badge badge-off';
 }
 
-function apagarEvento() {
-    if (!dataSelecionada) {
-        alert("Selecione primeiro um dia.");
-        return;
-    }
-
-    const chave = criarChave(
-        dataSelecionada.ano,
-        dataSelecionada.mes + 1,
-        dataSelecionada.dia
-    );
-
-    localStorage.removeItem(chave);
-    document.getElementById("anotacao").value = "";
-    mostrarCalendario();
+// ===== ENVIO DE DADOS =====
+function sendData() {
+  if (!client || !client.connected) return;
+  
+  var cowId = limparId($('cow-id').value);
+  var cowName = limparNome($('cow-name').value) || cowId;
+  
+  // estima voltagem da bateria (3.7V a 4.2V)
+  var battVolts = 3.7 + (batteryLevel || 0) / 100 * 0.5;
+  
+  var data = {
+    nome: cowName,
+    battPercent: batteryLevel || 0,
+    battVolts: +battVolts.toFixed(2),
+    solar: 0,
+    satelites: 0,
+    speed: +currentSpeed.toFixed(1),
+    alt: +currentAlt.toFixed(1),
+    uptime: Math.floor((Date.now() - startTime) / 1000),
+    rssi: 0,
+    wifi: '',
+    reset: new Date(startTime).toISOString().slice(0, 10),
+    gpsFix: gpsFix,
+    lat: +currentLat.toFixed(6),
+    lon: +currentLon.toFixed(6),
+    cst: 0,
+    dist: 0,
+    ts: Math.floor(Date.now() / 1000)
+  };
+  
+  var json = JSON.stringify(data);
+  client.publish(TOPIC_PREFIX + '/' + cowId + '/data', json, { qos: 1, retain: true });
+  
+  sentCount++;
+  $('st-sent').innerText = sentCount;
+  $('st-up').innerText = fmtUptime(Math.floor((Date.now() - startTime) / 1000));
 }
 
-function mesAnterior() {
-    fecharBalao();
-    dataAtual.setMonth(dataAtual.getMonth() - 1);
-    mostrarCalendario();
-}
-
-function mesProximo() {
-    fecharBalao();
-    dataAtual.setMonth(dataAtual.getMonth() + 1);
-    mostrarCalendario();
-}
-
-// Fecha balão ao tocar em qualquer lugar
-document.addEventListener("click", function(e) {
-    const balao = document.getElementById("balaoHQ");
-    if (!balao.contains(e.target) && !e.target.closest(".feriado")) {
-        balao.classList.remove("ativo");
-    }
+// ===== CONTROLE =====
+$('btn-toggle').addEventListener('click', function () {
+  if (running) {
+    stop();
+  } else {
+    start();
+  }
 });
 
-atualizarRelogio();
-setInterval(atualizarRelogio, 1000);
-mostrarCalendario();
+function start() {
+  var cowId = limparId($('cow-id').value);
+  if (!cowId) {
+    log(' Informe um ID válido', 'err');
+    $('cow-id').focus();
+    return;
+  }
+  
+  // salva config
+  localStorage.setItem('wbv_id', cowId);
+  localStorage.setItem('wbv_name', $('cow-name').value);
+  localStorage.setItem('wbv_interval', $('interval').value);
+  
+  if (!connectMQTT()) return;
+  
+  startGPS();
+  initBattery();
+  
+  if ($('wake-lock').checked) requestWakeLock();
+  
+  startTime = Date.now();
+  sentCount = 0;
+  running = true;
+  
+  $('btn-toggle').innerText = '⏹️ PARAR';
+  $('btn-toggle').className = 'btn btn-stop';
+  
+  var intervalSec = parseInt($('interval').value) || 5;
+  sendTimer = setInterval(sendData, intervalSec * 1000);
+  
+  log('▶️ Iniciado como "' + cowId + '"', 'ok');
+  log('Enviando a cada ' + intervalSec + 's', 'info');
+}
 
+function stop() {
+  running = false;
+  clearInterval(sendTimer);
+  sendTimer = null;
+  stopGPS();
+  disconnectMQTT();
+  releaseWakeLock();
+  
+  $('btn-toggle').innerText = '▶️ INICIAR';
+  $('btn-toggle').className = 'btn btn-start';
+  
+  log('⏹️ Parado', 'info');
+}
+
+// ===== INIT =====
+// carrega config salva
+$('cow-id').value = localStorage.getItem('wbv_id') || '';
+$('cow-name').value = localStorage.getItem('wbv_name') || '';
+$('interval').value = localStorage.getItem('wbv_interval') || '5';
+
+// avisa sobre permissões
+log('Sistema pronto. Configure e clique em INICIAR.', 'info');
+log('O celular pedirá permissão de GPS e bateria.', 'info');
+
+// mantém wake lock se a aba voltar ao foco
+document.addEventListener('visibilitychange', function () {
+  if (!document.hidden && running && $('wake-lock').checked) {
+    requestWakeLock();
+  }
+});
 </script>
-
 </body>
 </html>
